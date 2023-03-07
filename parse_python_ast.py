@@ -16,7 +16,7 @@ class NodeVisitor(astc.NodeVisitor):
         self.nodeId += 1
         name = ast_node.__class__.__name__
         id = None if 'id' not in ast_node._fields else ast_node.id
-        if 'value' in ast_node._fields and ast_node.value.__class__.__name__ != "Constant":
+        if 'value' in ast_node._fields and ast_node.value.__class__.__name__ != "Constant" and ast_node.value.__class__.__name__ != "Lambda":
             value = ast_node.value
         else:
             value = None
@@ -49,7 +49,7 @@ def get_ast(filename):
     with open(filename, "r") as f:
         source = f.read()
         tree = astc.parse(source)
-        # print(astc.dump(tree, indent=2))
+        print(astc.dump(tree, indent=2, include_attributes=True))
         visitor.visit(tree)
 
         # for node in visitor.edges.keys():

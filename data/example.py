@@ -1,2 +1,3 @@
-b = 3
+b = "dsc"
 #sdacsdc
+x = lambda a: a+1

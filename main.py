@@ -36,6 +36,7 @@ def create_graph(g, edges: dict[Node, list[Node]]):
                 if child not in visited:
                     nodes.put(child)
                     visited.append(child)
+                    # print(child.nodeId, child.name, child.value)
                     childVertex = add_node_as_vertex(child, g)
                     g.addE('child').from_(parentVertex).to(childVertex).iterate()
     
