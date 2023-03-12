@@ -4,10 +4,14 @@ from node import Node
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.process.anonymous_traversal import traversal
 
+from measures import comment_ratio
+
 # Adds a node as a vertex to the graph
 def add_node_as_vertex(node: Node, g):
-    return g.add_v(node.name)\
+    return g.add_v()\
+    .property("name", node.name)\
     .property("nodeId", node.nodeId)\
+    .property("lineno", node.lineno)\
     .property("depth", node.depth)\
     .property("id", node.id)\
     .property("value", node.value)\
@@ -19,7 +23,7 @@ def create_graph(g, edges: dict[Node, list[Node]]):
     visited: list[Node] = []
 
     # create Root node and add to queue
-    root = Node(0, "ROOT", -1, None, None)
+    root = Node(nodeId=0, name="ROOT", lineno=0, depth=-1, id=None, value=None)
     nodes.put(root)
     visited.append(root)
 
@@ -36,7 +40,7 @@ def create_graph(g, edges: dict[Node, list[Node]]):
                 if child not in visited:
                     nodes.put(child)
                     visited.append(child)
-                    # print(child.nodeId, child.name, child.value)
+                    print(child.nodeId, child.name, child.value)
                     childVertex = add_node_as_vertex(child, g)
                     g.addE('child').from_(parentVertex).to(childVertex).iterate()
     
@@ -59,7 +63,7 @@ def main():
 
     # Create graph from edges
     create_graph(g, edges)
-    # print(g.V().value_map().to_list())
+    comment_ratio(g)
     clean_graph(g)
 
     connection.close()

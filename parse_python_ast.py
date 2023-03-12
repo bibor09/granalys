@@ -9,18 +9,26 @@ class NodeVisitor(astc.NodeVisitor):
         self.edges: dict[Node] = dict()
         self.depth = -1
         self.nodeId = 0
-        self.parent = Node(self.nodeId, "ROOT", self.depth, None, None)
+        self.parent = Node(nodeId=self.nodeId, name="ROOT", lineno=0, depth=self.depth, id=None, value=None)
         self.bodies = dict()
 
     def set_node(self, ast_node):
         self.nodeId += 1
         name = ast_node.__class__.__name__
         id = None if 'id' not in ast_node._fields else ast_node.id
-        if 'value' in ast_node._fields and ast_node.value.__class__.__name__ != "Constant" and ast_node.value.__class__.__name__ != "Lambda":
+
+        # needs better solution instead of checking just for it in a list
+        if name not in ["Module", "Store", "arguments", "Load", "Add", "alias", "Div", "Lt", "And"]:
+            lineno = ast_node.lineno
+        else:
+            lineno = 0
+
+        if 'value' in ast_node._fields and ast_node.value.__class__.__name__ not in ["Constant", "Lambda", "Call", "Name"]:
             value = ast_node.value
         else:
             value = None
-        return Node(self.nodeId, name, self.depth, id, value)
+
+        return Node(self.nodeId, name, lineno, self.depth, id, value)
 
     def generic_visit(self, node):
         if "body" in node._fields:
@@ -49,7 +57,7 @@ def get_ast(filename):
     with open(filename, "r") as f:
         source = f.read()
         tree = astc.parse(source)
-        print(astc.dump(tree, indent=2, include_attributes=True))
+        # print(astc.dump(tree, indent=2, include_attributes=True))
         visitor.visit(tree)
 
         # for node in visitor.edges.keys():
