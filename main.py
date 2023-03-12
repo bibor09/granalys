@@ -1,5 +1,5 @@
 from queue import Queue
-import parse_python_ast
+import python_ast.parse_python_ast as parse_python_ast
 from node import Node
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.process.anonymous_traversal import traversal
@@ -40,7 +40,7 @@ def create_graph(g, edges: dict[Node, list[Node]]):
                 if child not in visited:
                     nodes.put(child)
                     visited.append(child)
-                    print(child.nodeId, child.name, child.value)
+                    # print(child.nodeId, child.name, child.value)
                     childVertex = add_node_as_vertex(child, g)
                     g.addE('child').from_(parentVertex).to(childVertex).iterate()
     

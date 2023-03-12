@@ -44,3 +44,6 @@ coverage.xml
 
 # xmls
 *.xml
+
+# ignore data folder
+/data

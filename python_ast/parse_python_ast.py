@@ -1,8 +1,16 @@
 import ast_comments as astc
 import builtins
 from node import Node
+from python_ast import nodes_with_attr_names
+import re
 
 builtin_types = [getattr(builtins, d) for d in dir(builtins) if isinstance(getattr(builtins, d), type)]
+
+def has_attributes(name):
+    return name in nodes_with_attr_names
+
+def is_primitive(name):
+    return re.match(r'^[a-z]+$', name)
 
 class NodeVisitor(astc.NodeVisitor):
     def __init__(self):
@@ -17,13 +25,12 @@ class NodeVisitor(astc.NodeVisitor):
         name = ast_node.__class__.__name__
         id = None if 'id' not in ast_node._fields else ast_node.id
 
-        # needs better solution instead of checking just for it in a list
-        if name not in ["Module", "Store", "arguments", "Load", "Add", "alias", "Div", "Lt", "And"]:
+        if has_attributes(name):
             lineno = ast_node.lineno
         else:
             lineno = 0
 
-        if 'value' in ast_node._fields and ast_node.value.__class__.__name__ not in ["Constant", "Lambda", "Call", "Name"]:
+        if 'value' in ast_node._fields and is_primitive(ast_node.value.__class__.__name__) :
             value = ast_node.value
         else:
             value = None
