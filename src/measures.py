@@ -1,4 +1,5 @@
 from gremlin_python.process.anonymous_traversal import GraphTraversalSource
+from gremlin_python.process.traversal import within
 
 # get comment and all lines of code ratio
 def comment_ratio(g: GraphTraversalSource):
@@ -13,5 +14,10 @@ def comment_ratio(g: GraphTraversalSource):
     print("Ratio:", comment_nr/lines_nr)
 
 # calculate cyclomatic code complexity from ast, countning the predicate nodes: G(v) = d + 1
+decision_nodes = ["For", "AsyncFor", "While", "If", "And", "Or", "Try", "TryStar"]
+
 def cyclomatic_complexity(g: GraphTraversalSource):
-    pass
+    complexity = g.V().has("name", within(decision_nodes)).count().next() + 1
+    print("Cyclomatic complexity:", complexity)
+
+# another measure

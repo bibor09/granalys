@@ -15,6 +15,6 @@ for node in nodes_with_attr:
     for name in names:
         nodes_with_attr_names.append(name)
 
-# Manually add pattern node names
-for pattern in ['MatchValue', 'MatchSingleton', 'MatchSequence', 'MatchMapping', 'MatchClass', 'MatchStar', 'MatchAs', 'MatchOr']:
-    nodes_with_attr_names.append(pattern)
+# # Manually add pattern node names USELESS in python v 3.9.x
+# for pattern in ['MatchValue', 'MatchSingleton', 'MatchSequence', 'MatchMapping', 'MatchClass', 'MatchStar', 'MatchAs', 'MatchOr']:
+#     nodes_with_attr_names.append(pattern)
