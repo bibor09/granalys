@@ -1,6 +1,6 @@
 import ast_comments as astc
 import builtins
-from node import Node
+from src.node import Node
 from python_ast import nodes_with_attr_names
 import re
 
