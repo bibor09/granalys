@@ -2,7 +2,7 @@ import sys
 import os
 from python_ast.parse_python_ast import get_ast
 from database import create, get_traversal_source, close_connection, clean_graph
-from src.measures import comment_ratio, cyclomatic_complexity
+from src.measures import comment_ratio, cyclomatic_complexity, lcom4
 
 def main():
     if len(sys.argv) < 2 or not os.path.isfile(sys.argv[1]):
@@ -17,10 +17,11 @@ def main():
     create.graph(g, edges)
 
     # Measures
-    comment_ratio(g)
-    cyclomatic_complexity(g)
+    # comment_ratio(g)
+    # cyclomatic_complexity(g)
+    # lcom4(g)
 
-    clean_graph(g)
+    # clean_graph(g)
 
     close_connection()
 

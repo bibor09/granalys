@@ -21,10 +21,10 @@ else:
             labels[key].append(values[key])
         # if key in depth.keys():
         #     labels[key].append(depth[key])
-        if key in linenos.keys():
-            labels[key].append(linenos[key])
+        # if key in linenos.keys():
+        #     labels[key].append(linenos[key])
             
     plt.figure(figsize=(200,200))
     pos = nx.nx_agraph.graphviz_layout(G, prog="dot")
-    nx.draw(G, pos=pos, node_color="#ffaa00",labels=labels,node_size=1000,font_size=5)
+    nx.draw(G, pos=pos, node_color="#ffaa00",labels=labels, with_labels=True, node_size=1000,font_size=5)
     plt.show()

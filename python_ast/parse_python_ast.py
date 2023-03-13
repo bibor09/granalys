@@ -24,14 +24,23 @@ class NodeVisitor(astc.NodeVisitor):
         self.nodeId += 1
         name = ast_node.__class__.__name__
         id = None if 'id' not in ast_node._fields else ast_node.id
+        # print(name, ast_node._fields)
+
+        if id and 'attr' in ast_node._fields:
+            print("benne", ast_node.attr)
+            id += f".{ast_node.attr}"
 
         if has_attributes(name):
             lineno = ast_node.lineno
         else:
             lineno = 0
 
-        if 'value' in ast_node._fields and is_primitive(ast_node.value.__class__.__name__) :
+        if name == "Attribute":
+            value = ast_node.attr
+        elif 'value' in ast_node._fields and is_primitive(ast_node.value.__class__.__name__) :
             value = ast_node.value
+        elif 'name' in ast_node._fields:
+            value = ast_node.name
         else:
             value = None
 
@@ -64,7 +73,7 @@ def get_ast(filename):
     with open(filename, "r") as f:
         source = f.read()
         tree = astc.parse(source)
-        # print(astc.dump(tree, indent=2, include_attributes=True))
+        print(astc.dump(tree, indent=2))
         visitor.visit(tree)
 
         # for node in visitor.edges.keys():
