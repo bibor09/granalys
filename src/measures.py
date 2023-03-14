@@ -1,6 +1,7 @@
 from gremlin_python.process.anonymous_traversal import GraphTraversalSource
 from gremlin_python.process.traversal import within
 from gremlin_python.process.graph_traversal import __
+from src.util import put_in_dict, find_clusters, find
 
 # get comment and all lines of code ratio
 def comment_ratio(g: GraphTraversalSource):
@@ -26,11 +27,23 @@ def cyclomatic_complexity(g: GraphTraversalSource):
 # LCOM4 class cohesion
 def lcom4(g: GraphTraversalSource):
     # Count connected components in class
-    # methods = g.V().has("name", "FunctionDef").values("value").toList()
-    methods = g.V().has("name", "FunctionDef").toList()
-    # descendants = g.V(methods[0]).emit().repeat(__.out_e().in_v().has("id", "self")).values("name").toList()
-    descendants = g.V(methods[0]).repeat(__.out()).has("id", "self").toList()
-    print(methods)
-    print(descendants)
+    # For every class-level variable save the methods which are using it
+    class_level_vars = dict()
 
-    # print(classes)
+    methods = g.V().has("name", "FunctionDef").toList()
+    method_names = g.V().has("name", "FunctionDef").values("value").toList()
+    for i in range(len(methods)):
+        # Looks for every descendant of method which has "self" in name
+        descendants = g.V(methods[i]).emit().repeat(__.out()).has("id","self").to_list()
+
+        for d in descendants: 
+        # Looks for every parent of those specific descendants
+            parent = g.V(d).in_e().out_v().values("value").next()
+            put_in_dict(parent, method_names[i], class_level_vars)
+
+    print(class_level_vars)
+    find_clusters(class_level_vars)
+    find(set(method_names), class_level_vars)
+    # NOT GOOD FOR METHODS !!!!!!!!!!!!!!
+
+
