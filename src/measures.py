@@ -27,8 +27,7 @@ def cyclomatic_complexity(g: GraphTraversalSource):
 # LCOM4 class cohesion
 def lcom4(g: GraphTraversalSource):
     # Count connected components in class
-    # For every class-level variable save the methods which are using it
-    class_level_vars = dict()
+    class_level = dict()
 
     methods = g.V().has("name", "FunctionDef").toList()
     method_names = g.V().has("name", "FunctionDef").values("value").toList()
@@ -37,13 +36,15 @@ def lcom4(g: GraphTraversalSource):
         descendants = g.V(methods[i]).emit().repeat(__.out()).has("id","self").to_list()
 
         for d in descendants: 
-        # Looks for every parent of those specific descendants
+            # Looks for every parent of those specific descendants
             parent = g.V(d).in_e().out_v().values("value").next()
-            put_in_dict(parent, method_names[i], class_level_vars)
+            put_in_dict(method_names[i], parent, class_level)
 
-    print(class_level_vars)
-    find_clusters(class_level_vars)
-    find(set(method_names), class_level_vars)
-    # NOT GOOD FOR METHODS !!!!!!!!!!!!!!
+    print(class_level)
+    find_clusters(class_level, method_names)
+    find(set(method_names), class_level)
 
-
+def is_empty(m, g: GraphTraversalSource):
+    descendants = g.V(m).emit().repeat(__.out()).values("name").to_list()
+    # print(descendants)
+    return descendants.sort() == ["Pass", "arguments"].sort()
