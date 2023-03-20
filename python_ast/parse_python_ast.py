@@ -56,6 +56,7 @@ class NodeVisitor(astc.NodeVisitor):
         # Keep body in count
 
         childNode = self.set_node(node)
+        self.edges[childNode] = []
         self.edges[self.parent].append(childNode)
         saved_parent = self.parent
 
@@ -73,7 +74,7 @@ def get_ast(filename):
     with open(filename, "r") as f:
         source = f.read()
         tree = astc.parse(source)
-        print(astc.dump(tree, indent=2))
+        # print(astc.dump(tree, indent=2))
         visitor.visit(tree)
 
         # for node in visitor.edges.keys():

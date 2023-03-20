@@ -25,14 +25,20 @@ def cyclomatic_complexity(g: GraphTraversalSource):
 
 
 # LCOM4 class cohesion: lack of cohesion in methods
-def lcom4(g: GraphTraversalSource):
+def lcom4_full(g: GraphTraversalSource):
+    classes = g.V().has("name", "ClassDef").toList()
+
+    for class_v in classes:
+        print(class_v, lcom4(g, class_v))     
+
+def lcom4(g: GraphTraversalSource, class_v):
     # For each method store used class-level variables and methods
     # If the method doesn't access any class-level variable or method, it isn't included in the dictionary
     pot_rel_methods = dict()
 
     # Get every method from class
-    methods = g.V().has("name", "FunctionDef").toList()
-    method_names = g.V().has("name", "FunctionDef").values("value").toList()
+    methods = g.V(class_v).emit().repeat(__.out()).has("name", "FunctionDef").toList()
+    method_names = g.V(class_v).emit().repeat(__.out()).has("name", "FunctionDef").values("value").toList()
 
     for i in range(len(methods)):
         # Looks for every descendant of method which has "self" in name
@@ -47,11 +53,11 @@ def lcom4(g: GraphTraversalSource):
     non_related_methods = find_non_related_methods(method_names, pot_rel_methods)
     empty_methods = 0
     for method in non_related_methods:
-        v = g.V().has("value", method).next()
+        v = g.V(class_v).emit().repeat(__.out()).has("value", method).next()
         if is_empty(v, g):
             empty_methods += 1
 
-    print("LCOM4 =", count_connected_components(pot_rel_methods, method_names) + len(non_related_methods) - empty_methods)
+    return count_connected_components(pot_rel_methods, method_names) + len(non_related_methods) - empty_methods
 
 def is_empty(m, g: GraphTraversalSource):
     descendants = g.V(m).emit().repeat(__.out()).values("name").to_list()
