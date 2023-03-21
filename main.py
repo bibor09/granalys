@@ -2,6 +2,7 @@ import sys
 import os
 from neo4j import GraphDatabase
 from python_ast.parse_python_ast import get_ast
+from src.measure import _comment_ratio
 
 URI = "neo4j://localhost:7687"
 AUTH = ("neo4j", "334yBQUaX2JdrCZ")
@@ -32,7 +33,11 @@ class Granalys:
                 command = input("Enter command: ")
                 if command == "comment":
                     # comment measure
-                    print("Not yet")
+                    try:
+                        session.execute_read(_comment_ratio)
+                    except Exception as e:
+                        print("Error:",e)
+                        alive = False
                 elif command == "exit":
                     alive = False
                     print("Exiting...") 
@@ -50,7 +55,7 @@ class Granalys:
                 SET n = {name:node.name, value:node.value, lineno:node.lineno, nodeId:node.nodeId}
                 """, names=names)
         summary = result.consume()
-        print(f"Added nodes in {summary.result_available_after} ms: {summary.counters}")
+        print(f"Added nodes\t[{summary.result_available_after} ms -- {summary.counters}]")
 
         # Add edges
         result = tx.run("""
@@ -61,7 +66,7 @@ class Granalys:
             CREATE (p)-[r:Child]->(c)
             """, batch=edges)
         summary = result.consume()
-        print(f"Added edges in {summary.result_available_after} ms: {summary.counters}")
+        print(f"Added edges\t[{summary.result_available_after} ms -- {summary.counters}]")
 
     @staticmethod
     def _delete_graph(tx):
@@ -71,7 +76,7 @@ class Granalys:
             DETACH DELETE n
             """)
         summary = result.consume()
-        print(f"Query done in {summary.result_available_after} ms: {summary.counters}")
+        print(f"Delete graph\t[{summary.result_available_after} ms -- {summary.counters}]")
 
 
 if __name__ == "__main__":
