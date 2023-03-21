@@ -17,28 +17,27 @@ class Granalys:
         self.driver.close()
         print("Closed connection")
 
-    def create_graph(self, nodes, edges):
-        with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._create_graph, nodes, edges)
+    def create_graph(self, session, nodes, edges):
+        session.execute_write(self._create_graph, nodes, edges)
 
-    def delete_graph(self):
-        with self.driver.session(database="neo4j") as session:
-            session.execute_write(self._delete_graph)
+    def delete_graph(self, session):
+        session.execute_write(self._delete_graph)
 
     def loop(self, nodes, edges):
-        self.create_graph(nodes, edges)
-        alive = True
+        with self.driver.session(database="neo4j") as session:
+            self.create_graph(session, nodes, edges)
+            alive = True
 
-        while alive:
-            command = input("Enter command: ")
-            if command == "comment":
-                # comment measure
-                print("Not yet")
-            elif command == "exit":
-                alive = False
-                print("Exiting...") 
+            while alive:
+                command = input("Enter command: ")
+                if command == "comment":
+                    # comment measure
+                    print("Not yet")
+                elif command == "exit":
+                    alive = False
+                    print("Exiting...") 
 
-        self.delete_graph()
+            self.delete_graph(session)
 
     @staticmethod
     def _create_graph(tx,  nodes, edges):
