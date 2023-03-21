@@ -7,5 +7,3 @@ def clean(tx):
     summary = result.consume()
     return summary
 
-def create(tx):
-    pass

@@ -14,7 +14,8 @@ def is_primitive(name):
 
 class NodeVisitor(astc.NodeVisitor):
     def __init__(self):
-        self.edges: dict[Node] = dict()
+        self.nodes: list[Node] = []
+        self.edges = []
         self.depth = -1
         self.nodeId = 0
         self.parent = Node(nodeId=self.nodeId, name="ROOT", lineno=0, depth=self.depth, id=None, value=None)
@@ -50,14 +51,14 @@ class NodeVisitor(astc.NodeVisitor):
         if "body" in node._fields:
             self.depth += 1
 
-        if self.parent not in self.edges.keys():
-            self.edges[self.parent] = []
+        if self.parent not in self.nodes:
+            self.nodes.append(self.parent)
 
         # Keep body in count
 
         childNode = self.set_node(node)
-        self.edges[childNode] = []
-        self.edges[self.parent].append(childNode)
+        self.nodes.append(childNode)
+        self.edges.append({"from":self.parent.nodeId, "to":childNode.nodeId})
         saved_parent = self.parent
 
         self.parent = childNode
@@ -79,4 +80,4 @@ def get_ast(filename):
 
         # for node in visitor.edges.keys():
         #     print(node.name, node.nodeId, node.id, node.depth, node.value)
-        return visitor.edges
+        return visitor.nodes, visitor.edges
