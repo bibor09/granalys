@@ -2,7 +2,7 @@ import sys
 import os
 from neo4j import GraphDatabase
 from python_ast.parse_python_ast import get_ast
-from src.measure import _comment_ratio
+from src.measure import _comment_ratio, _cyclomatic_complexity
 
 URI = "neo4j://localhost:7687"
 AUTH = ("neo4j", "334yBQUaX2JdrCZ")
@@ -30,11 +30,16 @@ class Granalys:
             alive = True
 
             while alive:
-                command = input("Enter command: ")
+                command = input(">> ")
                 if command == "comment":
-                    # comment measure
                     try:
                         session.execute_read(_comment_ratio)
+                    except Exception as e:
+                        print("Error:",e)
+                        alive = False
+                if command == "complexity":
+                    try:
+                        session.execute_read(_cyclomatic_complexity)
                     except Exception as e:
                         print("Error:",e)
                         alive = False
