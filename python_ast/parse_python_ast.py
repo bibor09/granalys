@@ -75,9 +75,9 @@ def get_ast(filename):
     with open(filename, "r") as f:
         source = f.read()
         tree = astc.parse(source)
-        # print(astc.dump(tree, indent=2))
+        ast_str = astc.dump(tree, indent=2)
         visitor.visit(tree)
 
         # for node in visitor.edges.keys():
         #     print(node.name, node.nodeId, node.id, node.depth, node.value)
-        return visitor.nodes, visitor.edges
+        return visitor.nodes, visitor.edges, ast_str
