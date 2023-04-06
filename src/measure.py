@@ -1,4 +1,6 @@
 import networkx as nx
+import hashlib
+import zlib
 
 def _comment_ratio(tx):
     result = tx.run("""
@@ -126,14 +128,75 @@ def _lcom4(tx, all_class_methods, empty_class_methods):
     # print(f'{r["class.value"]} -> {r["func.value"]} -> {r["attr.value"]}')
     
    
+
 # Code duplication
+def path_union(path1, path2):
+    path1_nodeIds = set([n["nodeId"] for n in path1])
+    path2_nodeIds = set([n["nodeId"] for n in path2])
+    path1_nodeIds.union(path2_nodeIds)
+
+    path_union = []
+    for n in path1:
+        if n["nodeId"] in path1_nodeIds:
+            path_union.append(n)
+    for n in path2:
+        if n["nodeId"] in path2_nodeIds:
+            if n not in path_union:
+                path_union.append(n)
+
+    return path_union
+
+def concat_node_attributes(node):
+    str = node["name"]
+    if "value" in node.keys():
+        str += node["value"]
+    if "id" in node.keys():
+        str += node["id"]
+    return str
+
+def hash_subtree(subtree):
+    str = ''
+    for n in subtree:
+        str += concat_node_attributes(n)
+    return zlib.crc32(bytearray(str, 'utf-8'))
 
 def _duplicates(tx):
-    clones = []
-    # for each subtree, if mass then hash i to bucket
-    # for each subtree i and j in the same bucket
-    pass
+    # 1 to not consider leaves
+    result = tx.run("""
+        MATCH path=(a:Node)-[r:Child*1..]->(b:Node)
+        WHERE not (b:Node)-[]->()
+        RETURN a, nodes(path) AS path
+        """)
+    r = result.data()
 
+    subtrees = dict()
+    # merge paths to get subtrees
+    for row in r:
+        a = row["a"]
+        id = a["nodeId"]
+        path = row["path"]
+        
+        if id not in subtrees.keys():
+            subtrees[id] = set()
+
+        subtrees[id] = path_union(subtrees[id], path)
+
+    # after subtrees are done
+    clones = dict()
+    for i in subtrees.values():
+        if len(i) >= 1:
+            hash = hash_subtree(i)
+        if hash not in clones.keys():
+            clones[hash] = []
+        clones[hash].append(i)
+
+    print("Duplicates:")
+    for trees in clones.values():
+        if len(trees) > 1:
+            lines = ''
+            for t in range(len(trees)):
+                lines += str(trees[t][0]["lineno"]) + " "
+            print(f"\tOn lines: {lines}")
 # Coverage
 
 
