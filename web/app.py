@@ -24,7 +24,7 @@ URL = "https://7f6c-188-24-36-114.ngrok-free.app"
 
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
-    url_base = f"{URL}/{user}/{repo}"
+    url_base = f"{user}/{repo}"
     # all_analyses = bs.get('analysis', {'user':user, 'repo': repo})
     all_analyses = db.get_all('analysis', user, repo)
     curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id})

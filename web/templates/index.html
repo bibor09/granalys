@@ -101,7 +101,7 @@
     </symbol>
   </svg>
 
-  <main class="d-flex flex-nowrap">
+  <main class="d-flex h-100 flex-nowrap">
     <div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 280px;">
       <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <span class="fs-4">Branches</span>
@@ -111,9 +111,9 @@
         {% for analysis in all_analyses %}
         <li id="branch-{{ branch_name }}" class="nav-item">
           {% if curr_analysis.branch == analysis.branch %}
-          <a href="{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white active">
+          <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white active">
           {% else %}
-          <a href="{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white">
+          <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white">
           {% endif %}
             <svg class="bi pe-none me-2" width="16" height="16">
               <use xlink:href="#branch" />
@@ -128,7 +128,17 @@
     </div>
 
     <div class="container px-4 py-5" id="featured-3">
-      <h2 class="pb-2 border-bottom">Measures</h2>
+      <div class="d-flex flex-row">
+        <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Measures</h2>
+        <div class="p-2">
+          <select class="form-select text-white bg-secondary" aria-label="method">
+            <option value="files" selected>Files</option>
+            <option value="overall">Overall</option>
+          </select>
+        </div>
+      </div>
+
+      
       <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
         <div class="feature col">
           <div

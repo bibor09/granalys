@@ -54,5 +54,5 @@ class Database:
         ]
         result = collection.aggregate(pipeline)
         result = [{"branch":r["_id"]["branch"], "gd_id":r["_id"]["gd_id"]} for r in result]
-        print(result)
+        result.sort(key=lambda x: x["branch"])
         return result

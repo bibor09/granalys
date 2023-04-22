@@ -17,11 +17,9 @@ const makeActive = function (e) {
   items = document.querySelectorAll(".nav-link.text-white.active");
   items.forEach(item => {
     item.classList.remove("active");
-    console.log(item.classList);
   });
 
   clicked.classList.add("active");
-  e.preventDefault();
 };
 
 window.onload = () => {
