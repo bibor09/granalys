@@ -10,22 +10,12 @@ from datetime import datetime
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
 db = Database('localhost', 27017, name='analyses')
 bs = Business(db)
-GITHUB_TOKEN = "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"
+GITHUB_TOKEN = "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"
 URL = "https://7f6c-188-24-36-114.ngrok-free.app"
-
-# Service
-# @app.route('/<user>/<repo>/<branch>', methods=['GET'])
-# def latest_event(user, repo, branch):
-#     url_base = request.url.split('/')[0:-2]
-#     all_analyses = db.get_all('analysis', user, repo)
-#     # all_analyses = bs.get('analysis', {'user':user, 'repo': repo})
-#     newest_analysis = bs.get_newest_analysis('analysis', {'user':user, 'repo': repo, 'branch': branch})
-#     return render_template("index.html", all_analyses=all_analyses, curr_analysis=newest_analysis, url_base=url_base)
 
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
     url_base = f"{user}/{repo}"
-    # all_analyses = bs.get('analysis', {'user':user, 'repo': repo})
     all_analyses = db.get_all('analysis', user, repo)
     curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id})
     return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base)
@@ -37,7 +27,6 @@ def webhook():
 
     if 'ref' in payload:
         branch = payload['ref'].split('/')[-1]
-        # clone_url = payload['repository']['clone_url']
         repo_name = payload['repository']['full_name']
 
         try:
@@ -55,9 +44,9 @@ def webhook():
         url = f"https://api.github.com/repos/{repo_name}/statuses/{payload['after']}"
         target_url = f"{URL}/{repo_name}/{branch}/{gd_id}"
         data = {'state': status, 'context': 'Code Analysis', "target_url": target_url}
-        requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data)
 
-    return jsonify({'status': 'success'})
+    return response.json()
 
 if __name__ == '__main__':
     app.run()
