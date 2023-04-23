@@ -31,6 +31,11 @@ class Database:
         collection = self.get_coll(coll_name)
         return collection.find(attributes).sort({'created': 1}).limit(1)
     
+    def get_gd_id(self, coll_name, attributes):
+        collection = self.get_coll(coll_name)
+        result = collection.find_one(attributes)
+        return result["gd_id"]
+    
     def get_all(self, coll_name, user, repo):
         collection = self.get_coll(coll_name)
         pipeline = [
@@ -47,12 +52,13 @@ class Database:
             },
             {
                 "$group": {
-                    "_id": {"branch": "$branch", "gd_id": "$gd_id"},
+                    "_id": "$branch",
                     "created": {"$first": "$created"},
                 },
             },
         ]
         result = collection.aggregate(pipeline)
-        result = [{"branch":r["_id"]["branch"], "gd_id":r["_id"]["gd_id"]} for r in result]
+        result = [{"branch":r["_id"], "gd_id": self.get_gd_id("analysis", {"user":user, "repo":repo, "branch":r["_id"], "created":r["created"]})} for r in result]
         result.sort(key=lambda x: x["branch"])
+        print(result)
         return result
