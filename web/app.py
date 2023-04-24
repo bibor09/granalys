@@ -1,10 +1,14 @@
 
 from flask import Flask, jsonify, request, render_template
 import requests
+import subprocess
+import os
+from git import Repo, rmtree
 from db.database import Database
 from db.models import Analysis
 from business import Business
 from datetime import datetime
+
 
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
@@ -28,6 +32,18 @@ def webhook():
     if 'ref' in payload:
         branch = payload['ref'].split('/')[-1]
         repo_name = payload['repository']['full_name']
+        clone_url = payload['repository']['clone_url']
+        modified = get_modified_files(payload['commits'])
+
+        Repo.clone_from(clone_url, f'./tmp/{repo_name}')
+        repo = Repo(f'./tmp/{repo_name}')
+
+        print("cloned")
+
+        # TODO call function that takes a list of files and does analysis
+            
+
+        print("done")
 
         try:
             data = {'user': repo_name.split('/')[0], 'repo': repo_name.split('/')[1], 'branch': branch, 'gd_id': gd_id, 'created': datetime.now(), 'statistics_all': None}
@@ -39,7 +55,12 @@ def webhook():
             print(e)
             status = 'failure'
             
-        # subprocess.run(['rm', '-rf', branch])
+        repo.close()
+        # TODO Automatic removal of repo
+        # rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=True)
+        # os.rmdir(f'./tmp/{repo_name}')
+        print("deleted")
+
         headers = {'Authorization': 'token ' + GITHUB_TOKEN}
         url = f"https://api.github.com/repos/{repo_name}/statuses/{payload['after']}"
         target_url = f"{URL}/{repo_name}/{branch}/{gd_id}"
@@ -47,6 +68,18 @@ def webhook():
         response = requests.post(url, headers=headers, json=data)
 
     return response.json()
+
+def get_modified_files(commits):
+    files = set()
+    for c in commits:
+        for f in c["added"]:
+            files.add(c)
+        for f in c["modified"]:
+            files.add(c)
+        for f in c["removed"]:
+            if f in files:
+                files.remove(f)
+    return files
 
 if __name__ == '__main__':
     app.run()

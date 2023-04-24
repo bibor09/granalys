@@ -1,5 +1,4 @@
 import networkx as nx
-import hashlib
 import zlib
 
 def _comment_ratio(tx):
@@ -14,7 +13,8 @@ def _comment_ratio(tx):
     lines_nr = r["lines_nr"]
     ratio = comment_nr/lines_nr
     summary = result.consume()
-    print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
+    return ratio
+    # print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
 
 # calculate cyclomatic code complexity from ast, counting the predicate nodes: G(v) = d + 1
 decision_nodes = ["For", "AsyncFor", "While", "If", "And", "Or", "Try", "TryStar"]
@@ -29,7 +29,8 @@ def _cyclomatic_complexity(tx):
     [r] = result.data()
     cc = r["cc"] + 1
     summary = result.consume()
-    print(f"Cyclomatic complexity: {cc}\t[{summary.result_available_after} ms]")
+    return cc
+    # print(f"Cyclomatic complexity: {cc}\t[{summary.result_available_after} ms]")
 
 
 

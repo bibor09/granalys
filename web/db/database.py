@@ -60,5 +60,4 @@ class Database:
         result = collection.aggregate(pipeline)
         result = [{"branch":r["_id"], "gd_id": self.get_gd_id("analysis", {"user":user, "repo":repo, "branch":r["_id"], "created":r["created"]})} for r in result]
         result.sort(key=lambda x: x["branch"])
-        print(result)
         return result

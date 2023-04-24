@@ -113,6 +113,20 @@ class Granalys:
         ms = int((e-s) * 1000)
         print(f"\t[{ms} ms]")
 
+    def make_analysis(self, files):
+        # dict: filename: dict(stats)
+
+        with self.driver.session(database="neo4j") as session:
+            for f in files:
+                self.create_graph(session, nodes, edges)
+
+                # TODO error handling
+                
+                # statistics
+                # session.execute_read(_duplicates)
+                    
+
+                self.delete_graph(session)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or not os.path.isfile(sys.argv[1]):
