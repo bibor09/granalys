@@ -134,6 +134,7 @@
 
     <!-- MEASURES -->
     <div class="container px-4 py-5" id="featured-3">
+
       <div class="d-flex flex-row">
         <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Measures</h2>
         <div class="p-2">
@@ -145,32 +146,73 @@
       </div>
 
       <!-- STATISTICS -->
-      <div class="d-flex overflow-auto row px-4 py-3">
-        <p><b>Id: </b>{{ curr_analysis.gd_id }} <b>Date: </b>{{ curr_analysis.created }} </p>
-        {% for stat in curr_analysis.statistics_all %}
-          <div class="d-flex row py-1 mb-1">
-            <div class="bg-primary .bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
-              <svg class="bi pe-none me-2" width="20" height="20">
-                <use xlink:href="#file" />
-              </svg>
-              {{ stat }}
-            </div>
-            <!-- stats -->
-            <div class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
-              <div class="row px-2">
-                <p class="col"><b>Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat]["comment"] }}</p>
-                <p class="col"><b>Code Compexity: </b>{{ curr_analysis.statistics_all[stat]["complexity"] }}</p>
+      <div class="d-flex column p-3">
+
+        <!-- TEXT-->
+        <div class="d-flex row w-50 overflow-auto px-2">
+          <p><b>Date: </b>{{ curr_analysis.created }} </p>
+          {% for stat in curr_analysis.statistics_all %}
+            <div class="d-flex row py-1 mb-1">
+              <div class="bg-primary .bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
+                <svg class="bi pe-none me-2" width="20" height="20">
+                  <use xlink:href="#file" />
+                </svg>
+                {{ stat }}
               </div>
-              <div class="row px-2">
-                <p class="col"><b>Other: </b> blablabla </p>
-                <p class="col"><b>Another thing: </b>blabla</p>
-                <!-- <p class="col"></p> -->
+              <!-- stats -->
+              <div class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
+                <div class="row px-2">
+                  <p class="col"><b>Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat]["comment"] }}</p>
+                  <p class="col"><b>Code Compexity: </b>{{ curr_analysis.statistics_all[stat]["complexity"] }}</p>
+                </div>
+                <div class="row px-2">
+                  <p class="col"><b>Other: </b> blablabla </p>
+                  <p class="col"><b>Another thing: </b>blabla</p>
+                  <!-- <p class="col"></p> -->
+                </div>
               </div>
             </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
+
+        <!-- CODE -->
+        <div class="w-50 bg-light px-2">
+          <pre>cx  cx
+            sdcsdc
+            dscsd
+            cds
+            csddc
+            sdcsdc
+            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
+            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
+            --bs-btn-focus-shadow-rgbdfv
+            gfb
+            fg
+            sdcsdc
+            dscsd
+            cds
+            csddc
+            sdcsdc
+            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
+            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
+            --bs-btn-focus-shadow-rgbdfv
+            gfb
+            fg
+            gfb
+            fg
+            sdcsdc
+            dscsd
+            cds
+            csddc
+            sdcsdc
+            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
+            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
+            --bs-btn-focus-shadow-rgbdfv
+            gfb
+            fg
+          </pre>
+        </div>
       </div>
-    </div>
 
   </div>
 </body>
