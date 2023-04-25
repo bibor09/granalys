@@ -3,11 +3,14 @@ from flask import Flask, jsonify, request, render_template
 import requests
 import subprocess
 import os
+import stat
+import shutil
 from git import Repo, rmtree
 from db.database import Database
 from db.models import Analysis
 from business import Business
 from datetime import datetime
+from src_cpy.analyzer import analyze_files
 
 
 # Initialize
@@ -41,12 +44,13 @@ def webhook():
         print("cloned")
 
         # TODO call function that takes a list of files and does analysis
-            
+        base = f'./tmp/{repo_name}'
+        stats = analyze_files(base, modified)
 
         print("done")
 
         try:
-            data = {'user': repo_name.split('/')[0], 'repo': repo_name.split('/')[1], 'branch': branch, 'gd_id': gd_id, 'created': datetime.now(), 'statistics_all': None}
+            data = {'user': repo_name.split('/')[0], 'repo': repo_name.split('/')[1], 'branch': branch, 'gd_id': gd_id, 'created': datetime.now(), 'statistics_all': stats}
             analysis = Analysis(**data)
             bs.save(coll_name='analysis', entity=analysis)
 
@@ -56,9 +60,8 @@ def webhook():
             status = 'failure'
             
         repo.close()
-        # TODO Automatic removal of repo
-        # rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=True)
-        # os.rmdir(f'./tmp/{repo_name}')
+        # TODO: error handling
+        shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
         print("deleted")
 
         headers = {'Authorization': 'token ' + GITHUB_TOKEN}
@@ -69,13 +72,18 @@ def webhook():
 
     return response.json()
 
+def rm_dir_readonly(func, path, _):
+    "Clear the readonly bit and reattempt the removal"
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
 def get_modified_files(commits):
     files = set()
     for c in commits:
         for f in c["added"]:
-            files.add(c)
+            files.add(f)
         for f in c["modified"]:
-            files.add(c)
+            files.add(f)
         for f in c["removed"]:
             if f in files:
                 files.remove(f)

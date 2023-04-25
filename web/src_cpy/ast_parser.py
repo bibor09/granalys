@@ -1,17 +1,30 @@
-import ast_comments as astc
-import builtins
-from src.node import Node
-from python_ast import nodes_with_attr_names
+import ast
 import re
+import ast_comments as astc
+from .node import Node
 
-builtin_types = [getattr(builtins, d) for d in dir(builtins) if isinstance(getattr(builtins, d), type)]
+# Initialize list with node names that have attributes
+nodes_with_attr = [ast.stmt, ast.expr, ast.excepthandler, ast.arg, ast.keyword, ast.alias]
+nodes_with_attr_names = []
 
+def get_node_name(node):
+    matching = re.search(r'[A-Z][\w\d]*', node)
+    if matching:
+        return matching.group()
+    
+for node in nodes_with_attr:
+    names = list(map(get_node_name, node.__doc__.split("\n")))
+    for name in names:
+        nodes_with_attr_names.append(name)
+
+# Methods
 def has_attributes(name):
     return name in nodes_with_attr_names
 
 def is_primitive(name):
     return re.match(r'^[a-z]+$', name)
 
+# Class
 class NodeVisitor(astc.NodeVisitor):
     def __init__(self):
         self.nodes: list[Node] = []

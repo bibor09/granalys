@@ -3,9 +3,8 @@ html, body {
   margin: 0;
 }
 
-main {
-  overflow-x: auto;
-  overflow-y: hidden;
+body {
+  overflow: auto;
 }
 
 .dropdown-toggle { outline: 0; }

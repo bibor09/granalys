@@ -99,10 +99,16 @@
       <path
         d="M384 144c0-44.2-35.8-80-80-80s-80 35.8-80 80c0 36.4 24.3 67.1 57.5 76.8-.6 16.1-4.2 28.5-11 36.9-15.4 19.2-49.3 22.4-85.2 25.7-28.2 2.6-57.4 5.4-81.3 16.9v-144c32.5-10.2 56-40.5 56-76.3 0-44.2-35.8-80-80-80S0 35.8 0 80c0 35.8 23.5 66.1 56 76.3v199.3C23.5 365.9 0 396.2 0 432c0 44.2 35.8 80 80 80s80-35.8 80-80c0-34-21.2-63.1-51.2-74.6 3.1-5.2 7.8-9.8 14.9-13.4 16.2-8.2 40.4-10.4 66.1-12.8 42.2-3.9 90-8.4 118.2-43.4 14-17.4 21.1-39.8 21.6-67.9 31.6-10.8 54.4-40.7 54.4-75.9zM80 64c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16zm0 384c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16zm224-320c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16z" />
     </symbol>
+    <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16"> -->
+    <symbol id="file" viewBox="0 0 16 16">
+      <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+    </symbol>
+    <!-- </svg> -->
   </svg>
 
-  <main class="d-flex h-100 flex-nowrap">
-    <div class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark" style="width: 280px;">
+  <div class="d-flex h-100 flex-nowrap">
+    <!-- BRANCHES -->
+    <div class="d-flex flex-column flex-shrink-1 p-3 text-bg-dark" style="width: 280px;">
       <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <span class="fs-4">Branches</span>
       </a>
@@ -123,10 +129,10 @@
         </li>
         {% endfor %}
       </ul>
-
       <hr>
     </div>
 
+    <!-- MEASURES -->
     <div class="container px-4 py-5" id="featured-3">
       <div class="d-flex flex-row">
         <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Measures</h2>
@@ -138,65 +144,35 @@
         </div>
       </div>
 
-      
-      <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
-        <div class="feature col">
-          <div
-            class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-            <svg class="bi" width="1em" height="1em">
-              <use xlink:href="#collection" />
-            </svg>
+      <!-- STATISTICS -->
+      <div class="d-flex overflow-auto row px-4 py-3">
+        <p><b>Id: </b>{{ curr_analysis.gd_id }} <b>Date: </b>{{ curr_analysis.created }} </p>
+        {% for stat in curr_analysis.statistics_all %}
+          <div class="d-flex row py-1 mb-1">
+            <div class="bg-primary .bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
+              <svg class="bi pe-none me-2" width="20" height="20">
+                <use xlink:href="#file" />
+              </svg>
+              {{ stat }}
+            </div>
+            <!-- stats -->
+            <div class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
+              <div class="row px-2">
+                <p class="col"><b>Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat]["comment"] }}</p>
+                <p class="col"><b>Code Compexity: </b>{{ curr_analysis.statistics_all[stat]["complexity"] }}</p>
+              </div>
+              <div class="row px-2">
+                <p class="col"><b>Other: </b> blablabla </p>
+                <p class="col"><b>Another thing: </b>blabla</p>
+                <!-- <p class="col"></p> -->
+              </div>
+            </div>
           </div>
-          <h3 class="fs-2">Comment-line ratio</h3>
-          <p>Id: {{ curr_analysis.gd_id }} </p>
-          <p>Created: {{ curr_analysis.created }}</p>
-          <a href="#" class="icon-link">
-            Call to action
-            <svg class="bi">
-              <use xlink:href="#chevron-right" />
-            </svg>
-          </a>
-        </div>
-        
-        <!-- <div class="feature col">
-          <div
-            class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-            <svg class="bi" width="1em" height="1em">
-              <use xlink:href="#people-circle" />
-            </svg>
-          </div>
-          <h3 class="fs-2">Cyclomatic complexity</h3>
-          <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and
-            probably just keep going until we run out of words.</p>
-        </div> -->
-
-        <!-- <div class="feature col">
-          <div
-            class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-            <svg class="bi" width="1em" height="1em">
-              <use xlink:href="#toggles2" />
-            </svg>
-          </div>
-          <h3 class="fs-2">Duplicates</h3>
-          <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and
-            probably just keep going until we run out of words.</p>
-        </div> -->
-
-        <!-- <div class="feature col">
-          <div
-            class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
-            <svg class="bi" width="1em" height="1em">
-              <use xlink:href="#toggles2" />
-            </svg>
-          </div>
-          <h3 class="fs-2">LCOM4</h3>
-          <p>Paragraph of text beneath the heading to explain the heading. We'll add onto it with another sentence and
-            probably just keep going until we run out of words.</p>
-        </div> -->
+        {% endfor %}
       </div>
     </div>
 
-  </main>
+  </div>
 </body>
 
 </html>

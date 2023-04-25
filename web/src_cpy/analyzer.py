@@ -2,8 +2,8 @@ import sys
 import os
 import time
 from neo4j import GraphDatabase
-from python_ast.parse_python_ast import get_ast
-from src.measure import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, _get_all_class_methods, _get_empty_methods
+from .ast_parser import get_ast
+from .measure import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, _get_all_class_methods, _get_empty_methods
 
 URI = "neo4j://localhost:7687"
 AUTH = ("neo4j", "334yBQUaX2JdrCZ")
@@ -27,45 +27,7 @@ class Granalys:
 
     def loop(self, nodes, edges):
         with self.driver.session(database="neo4j") as session:
-            self.create_graph(session, nodes, edges)
-            alive = True
-
-            while alive:
-                command = input(">> ")
-                if command == "comment":
-                    try:
-                        session.execute_read(_comment_ratio)
-                    except Exception as e:
-                        print("Error:",e)
-                        alive = False
-                        
-                elif command == "complexity":
-                    try:
-                        session.execute_read(_cyclomatic_complexity)
-                    except Exception as e:
-                        print("Error:",e)
-                        alive = False
-
-                elif command == "lcom4":
-                    try:
-                        self.lcom4(session)
-                    except Exception as e:
-                        print("Error:",e)
-                        alive = False
-
-                elif command == "duplicates":
-                    try:
-                        session.execute_read(_duplicates)
-                    except Exception as e:
-                        print("Error:", e)
-                        alive = False
-
-                elif command == "print":
-                    print(ast_str) 
-
-                elif command == "exit":
-                    alive = False
-                    print("Exiting...") 
+            self.create_graph(session, nodes, edges) 
 
             self.delete_graph(session)
 
@@ -113,14 +75,30 @@ class Granalys:
         ms = int((e-s) * 1000)
         print(f"\t[{ms} ms]")
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2 or not os.path.isfile(sys.argv[1]):
-        print(f"Correct format: {sys.argv[0]} file")
-        sys.exit()
+    def analyze_files(self, base, files):
+        # dict: filename: dict(stats)
+        stats = dict()
 
-    nodes, edges, ast_str = get_ast(sys.argv[1])
-    print(f"Parsed code.")
+        with self.driver.session(database="neo4j") as session:
+            # TODO error handling
+            for f in files:
+                nodes, edges, ast_str = get_ast(f"{base}/{f}")
+                self.create_graph(session, nodes, edges)
 
+                comment_rat = session.execute_read(_comment_ratio)
+                cc = session.execute_read(_cyclomatic_complexity)
+                print("Got stats.")
+
+                stats[f] = {"comment":comment_rat, "complexity": cc}
+                
+                self.delete_graph(session)
+                print(f"File '{f}' done.")
+
+        return stats
+
+def analyze_files(base, files):
     instance = Granalys(URI, AUTH)
-    instance.loop(nodes, edges)
+    print("Analyzing files:", files)
+    stats = instance.analyze_files(base, files)
     instance.close()
+    return stats

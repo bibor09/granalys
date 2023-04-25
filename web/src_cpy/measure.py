@@ -11,7 +11,10 @@ def _comment_ratio(tx):
     [r] = result.data()
     comment_nr = r["comment_nr"]
     lines_nr = r["lines_nr"]
-    ratio = comment_nr/lines_nr
+    if lines_nr != 0:
+        ratio = comment_nr/lines_nr
+    else:
+        ratio = "empty file"
     summary = result.consume()
     return ratio
     # print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
