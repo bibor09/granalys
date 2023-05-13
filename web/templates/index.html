@@ -14,8 +14,9 @@
     crossorigin="anonymous"></script>
 
   <!-- Custom -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}" >
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
   <script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
+  <!-- <script src="{{ url_for('static', filename='js/third-party/prism-python.js') }}"></script> -->
 
   <style>
     .bd-placeholder-img {
@@ -101,14 +102,15 @@
     </symbol>
     <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16"> -->
     <symbol id="file" viewBox="0 0 16 16">
-      <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+      <path
+        d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z" />
     </symbol>
     <!-- </svg> -->
   </svg>
 
-  <div class="d-flex h-100 flex-nowrap">
+  <div id="main" class="d-flex vh-100 flex-nowrap">
     <!-- BRANCHES -->
-    <div class="d-flex flex-column flex-shrink-1 p-3 text-bg-dark" style="width: 280px;">
+    <div id="sidebar" class="d-flex flex-column flex-shrink-1 p-3 h-100 text-bg-dark" style="width: 280px;">
       <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
         <span class="fs-4">Branches</span>
       </a>
@@ -118,14 +120,14 @@
         <li id="branch-{{ branch_name }}" class="nav-item">
           {% if curr_analysis.branch == analysis.branch %}
           <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white active">
-          {% else %}
-          <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white">
-          {% endif %}
-            <svg class="bi pe-none me-2" width="16" height="16">
-              <use xlink:href="#branch" />
-            </svg>
-            {{ analysis.branch }}
-          </a>
+            {% else %}
+            <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white">
+              {% endif %}
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <use xlink:href="#branch" />
+              </svg>
+              {{ analysis.branch }}
+            </a>
         </li>
         {% endfor %}
       </ul>
@@ -133,9 +135,8 @@
     </div>
 
     <!-- MEASURES -->
-    <div class="container px-4 py-5" id="featured-3">
-
-      <div class="d-flex flex-row">
+    <div id="measure" class="container px-4 py-5 h-100">
+      <div id="measure-header" class="d-flex flex-row">
         <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Measures</h2>
         <div class="p-2">
           <select class="form-select text-white bg-secondary" aria-label="method">
@@ -144,23 +145,23 @@
           </select>
         </div>
       </div>
+      <p class="px-2"><b>Date: </b>{{ curr_analysis.created }} </p>
 
       <!-- STATISTICS -->
-      <div class="d-flex column p-3">
-
+      <div id="statistics" class="d-flex flex-row p-3">
         <!-- TEXT-->
-        <div class="d-flex row w-50 overflow-auto px-2">
-          <p><b>Date: </b>{{ curr_analysis.created }} </p>
+        <div class="d-flex flex-column overflow-auto h-100 w-75 px-2">
           {% for stat in curr_analysis.statistics_all %}
-            <div class="d-flex row py-1 mb-1">
-              <div class="bg-primary .bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
+            <div id="stat-box" class="d-flex flex-column px-1 py-1 mb-1">
+              <div id="stat-box-header"
+                class="bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
                 <svg class="bi pe-none me-2" width="20" height="20">
                   <use xlink:href="#file" />
                 </svg>
                 {{ stat }}
               </div>
               <!-- stats -->
-              <div class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
+              <div id="stat-box-body" class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
                 <div class="row px-2">
                   <p class="col"><b>Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat]["comment"] }}</p>
                   <p class="col"><b>Code Compexity: </b>{{ curr_analysis.statistics_all[stat]["complexity"] }}</p>
@@ -172,47 +173,15 @@
                 </div>
               </div>
             </div>
-          {% endfor %}
         </div>
 
         <!-- CODE -->
-        <div class="w-50 bg-light px-2">
-          <pre>cx  cx
-            sdcsdc
-            dscsd
-            cds
-            csddc
-            sdcsdc
-            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
-            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
-            --bs-btn-focus-shadow-rgbdfv
-            gfb
-            fg
-            sdcsdc
-            dscsd
-            cds
-            csddc
-            sdcsdc
-            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
-            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
-            --bs-btn-focus-shadow-rgbdfv
-            gfb
-            fg
-            gfb
-            fg
-            sdcsdc
-            dscsd
-            cds
-            csddc
-            sdcsdc
-            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
-            sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe
-            --bs-btn-focus-shadow-rgbdfv
-            gfb
-            fg
-          </pre>
+        <div id="code-box" class="overflow-auto h-75 w-50 px-2 mx-4">
+          <pre class="language-python">{{ curr_analysis.statistics_all[stat]["content"] }}</pre>
         </div>
       </div>
+      {% endfor %}
+    </div>
 
   </div>
 </body>

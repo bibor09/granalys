@@ -76,23 +76,27 @@ class Granalys:
         print(f"\t[{ms} ms]")
 
     def analyze_files(self, base, files):
-        # dict: filename: dict(stats)
+        # dict: {filename: dict(stats)}
         stats = dict()
 
-        with self.driver.session(database="neo4j") as session:
-            # TODO error handling
-            for f in files:
-                nodes, edges, ast_str = get_ast(f"{base}/{f}")
-                self.create_graph(session, nodes, edges)
+        try:
+            with self.driver.session(database="neo4j") as session:
+                # TODO error handling
+                for f in files:
+                    nodes, edges, ast_str = get_ast(f"{base}/{f}")
+                    self.create_graph(session, nodes, edges)
 
-                comment_rat = session.execute_read(_comment_ratio)
-                cc = session.execute_read(_cyclomatic_complexity)
-                print("Got stats.")
+                    comment_rat = session.execute_read(_comment_ratio)
+                    cc = session.execute_read(_cyclomatic_complexity)
+                    print("Got stats.")
 
-                stats[f] = {"comment":comment_rat, "complexity": cc}
-                
-                self.delete_graph(session)
-                print(f"File '{f}' done.")
+                    with open(f"{base}/{f}", "r") as file:
+                        stats[f] = {"comment":comment_rat, "complexity": cc, "content": file.read()}
+                    
+                    self.delete_graph(session)
+                    print(f"File '{f}' done.")
+        except:
+            return None
 
         return stats
 

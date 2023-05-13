@@ -1,5 +1,4 @@
 html, body {
-  height: 100%;
   margin: 0;
 }
 
@@ -52,4 +51,23 @@ body {
 
 .scrollarea {
   overflow-y: auto;
+}
+
+#statistics {
+  height: 90%;
+}
+
+#code-box {
+  background-color: rgb(230, 246, 241);
+  display: none;
+}
+
+
+#stat-box-header {
+  background-color: #0d6efd;
+}
+
+#stat-box-header:hover {
+  background-color: #094fb9;
+  transform: scale(1.02);
 }

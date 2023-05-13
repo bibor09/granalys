@@ -1,24 +1,23 @@
 
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, request, render_template, Response
+from http import HTTPStatus
 import requests
-import subprocess
 import os
 import stat
 import shutil
-from git import Repo, rmtree
+from git import Repo, exc
 from db.database import Database
 from db.models import Analysis
 from business import Business
 from datetime import datetime
 from src_cpy.analyzer import analyze_files
 
-
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
 db = Database('localhost', 27017, name='analyses')
 bs = Business(db)
-GITHUB_TOKEN = "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"
-URL = "https://7f6c-188-24-36-114.ngrok-free.app"
+GITHUB_TOKEN = "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"
+URL = "https://83d0-2a02-2f0e-10e-5d00-50e6-834-2b1b-2d2a.ngrok-free.app"
 
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
@@ -27,49 +26,91 @@ def event_by_id(user, repo, branch, gd_id):
     curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id})
     return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base)
 
+'''
+    Listens for push events on configured Github repository. Analyzes modified files, and sets event status.
+'''
 @app.route('/', methods=['POST'])
 def webhook():
     payload = request.json
     gd_id = request.headers.get('X-GitHub-Delivery')
 
-    if 'ref' in payload:
-        branch = payload['ref'].split('/')[-1]
-        repo_name = payload['repository']['full_name']
-        clone_url = payload['repository']['clone_url']
-        modified = get_modified_files(payload['commits'])
+    if not gd_id:
+        app.logger.error("Github push event has invalid header format.")
+        return Response("Error: Github push event has invalid header format.", status = HTTPStatus.BAD_REQUEST)       
+        
+    # Get payload information
+    if 'ref' not in payload or 'repository' not in payload or 'full_name' not in payload['repository'] or 'clone_url' not in payload['repository'] or 'commits' not in payload:
+        app.logger.error("Github push event has invalid payload format.")
+        return Response("Error: Github push event has invalid payload format.", status = HTTPStatus.BAD_REQUEST)
+    
+    branch = payload['ref'].split('/')[-1]
+    repo_name = payload['repository']['full_name']
+    clone_url = payload['repository']['clone_url']
+    files = get_modified_files(payload['commits'])
+        
 
-        Repo.clone_from(clone_url, f'./tmp/{repo_name}')
-        repo = Repo(f'./tmp/{repo_name}')
+    # Build response header
+    base = f'./tmp/{repo_name}'
+    resp_headers = {'Authorization': 'token ' + GITHUB_TOKEN}
+    resp_url = f"https://api.github.com/repos/{repo_name}/statuses/{payload['after']}"
+    resp_target_url = f"{URL}/{repo_name}/{branch}/{gd_id}"
+    resp_data = {'context': 'Code Analysis'}
 
-        print("cloned")
-
-        # TODO call function that takes a list of files and does analysis
-        base = f'./tmp/{repo_name}'
-        stats = analyze_files(base, modified)
-
-        print("done")
-
-        try:
-            data = {'user': repo_name.split('/')[0], 'repo': repo_name.split('/')[1], 'branch': branch, 'gd_id': gd_id, 'created': datetime.now(), 'statistics_all': stats}
-            analysis = Analysis(**data)
-            bs.save(coll_name='analysis', entity=analysis)
-
-            status = 'success'
-        except Exception as e:
-            print(e)
-            status = 'failure'
-            
-        repo.close()
-        # TODO: error handling
+    # Clone repository
+    try:
+        Repo.clone_from(url=clone_url, to_path=base)
+        repo = Repo(path=base)
+        app.logger.info("Repository was cloned successfully.")
+    except Exception as e:
+        app.logger.error("Failed to clone repository.")
+        resp_data['state'] = 'failure'
+        resp_data['description'] = 'Failed to clone repository.'
         shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
-        print("deleted")
+        return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
 
-        headers = {'Authorization': 'token ' + GITHUB_TOKEN}
-        url = f"https://api.github.com/repos/{repo_name}/statuses/{payload['after']}"
-        target_url = f"{URL}/{repo_name}/{branch}/{gd_id}"
-        data = {'state': status, 'context': 'Code Analysis', "target_url": target_url}
-        response = requests.post(url, headers=headers, json=data)
+    # Checkout current branch
+    try:
+        repo.git.checkout(branch)
+        app.logger.info("Branch checked out successfully.")
+    except:
+        app.logger.error(f"Failed to check out branch '{branch}'.")
+        resp_data['state'] = 'failure'
+        resp_data['description'] = 'Failed to check out branch.'
+        shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
+        return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
+        
+    # Execute analysis
+    # TODO: error handling
+    stats_all = analyze_files(base, files)
+    repo.close()
 
+    if not stats_all:
+        app.logger.error("Failed to analyze files.", e)
+        resp_data['state'] = 'failure'
+        resp_data['description'] = 'Failed to analyze files.'
+        shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
+        return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
+
+    # Build Github push event statistics data
+    data = {'user': repo_name.split('/')[0], \
+            'repo': repo_name.split('/')[1], \
+            'branch': branch, \
+            'gd_id': gd_id, \
+            'created': datetime.now(), \
+            'statistics_all': stats_all}
+    analysis = Analysis(**data)
+    # TODO Error handling
+    bs.save(coll_name='analysis', entity=analysis)
+
+    resp_data['state'] = 'success'
+    resp_data['description'] = "Analysis completed."
+    resp_data["target_url"] = resp_target_url
+    response = requests.post(resp_url, headers=resp_headers, json=resp_data)
+    app.logger.info("Files analyzed successfully.")
+
+    # Cleanup
+    # TODO: error handling
+    shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
     return response.json()
 
 def rm_dir_readonly(func, path, _):
