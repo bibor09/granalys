@@ -5,18 +5,19 @@ import requests
 import os
 import stat
 import shutil
-from git import Repo, exc
+from git import Repo
 from db.database import Database
 from db.models import Analysis
 from business import Business
 from datetime import datetime
 from src_cpy.analyzer import analyze_files
+from config import get_config
 
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
 db = Database('localhost', 27017, name='analyses')
 bs = Business(db)
-GITHUB_TOKEN = "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"
+GITHUB_TOKEN = get_config()["github.auth.token"]
 URL = "https://83d0-2a02-2f0e-10e-5d00-50e6-834-2b1b-2d2a.ngrok-free.app"
 
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])

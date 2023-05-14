@@ -1,5 +1,3 @@
-import sys
-import os
 import time
 from neo4j import GraphDatabase
 from .ast_parser import get_ast
@@ -10,26 +8,17 @@ AUTH = ("neo4j", "334yBQUaX2JdrCZ")
 
 class Granalys:
     def __init__(self, uri, auth):
-        print("Connecting to database...")
         self.driver = GraphDatabase.driver(uri, auth=auth)
         self.driver.verify_connectivity()
-        print("Connected")
 
     def close(self):
         self.driver.close()
-        print("Closed connection")
 
     def create_graph(self, session, nodes, edges):
         session.execute_write(self._create_graph, nodes, edges)
 
     def delete_graph(self, session):
         session.execute_write(self._delete_graph)
-
-    def loop(self, nodes, edges):
-        with self.driver.session(database="neo4j") as session:
-            self.create_graph(session, nodes, edges) 
-
-            self.delete_graph(session)
 
     @staticmethod
     def _create_graph(tx,  nodes, edges):
@@ -42,7 +31,6 @@ class Granalys:
                 SET n = {name:node.name, value:node.value, lineno:node.lineno, id:node.id, nodeId:node.nodeId}
                 """, names=names)
         summary = result.consume()
-        print(f"Added nodes\t[{summary.result_available_after} ms -- {summary.counters}]")
 
         # Add edges
         result = tx.run("""
@@ -53,17 +41,14 @@ class Granalys:
             CREATE (p)-[r:Child]->(c)
             """, batch=edges)
         summary = result.consume()
-        print(f"Added edges\t[{summary.result_available_after} ms -- {summary.counters}]")
 
     @staticmethod
     def _delete_graph(tx):
-        # Delete
         result = tx.run("""
             MATCH (n)
             DETACH DELETE n
             """)
         summary = result.consume()
-        print(f"Delete graph\t[{summary.result_available_after} ms -- {summary.counters}]")
 
     @staticmethod
     def lcom4(session):
@@ -73,7 +58,6 @@ class Granalys:
         session.execute_read(_lcom4, all_class_methods, empty_class_methods)
         e = time.time()
         ms = int((e-s) * 1000)
-        print(f"\t[{ms} ms]")
 
     def analyze_files(self, base, files):
         # dict: {filename: dict(stats)}
@@ -88,7 +72,6 @@ class Granalys:
 
                     comment_rat = session.execute_read(_comment_ratio)
                     cc = session.execute_read(_cyclomatic_complexity)
-                    print("Got stats.")
 
                     with open(f"{base}/{f}", "r") as file:
                         stats[f] = {"comment":comment_rat, "complexity": cc, "content": file.read()}

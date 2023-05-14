@@ -1,7 +1,7 @@
 import networkx as nx
 import zlib
 
-def _comment_ratio(tx):
+def _comment_ratio(tx, verbose = False):
     result = tx.run("""
         MATCH (n:Node {name: $comment})
         WITH count(n) as comment_nr
@@ -16,12 +16,17 @@ def _comment_ratio(tx):
     else:
         ratio = "empty file"
     summary = result.consume()
+
+    if verbose:
+        print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
+    
     return ratio
+    
 
 # calculate cyclomatic code complexity from ast, counting the predicate nodes: G(v) = d + 1
 decision_nodes = ["For", "AsyncFor", "While", "If", "And", "Or", "Try", "TryStar"]
 
-def _cyclomatic_complexity(tx):
+def _cyclomatic_complexity(tx, verbose = False):
     nodes = [{"name": name} for name in decision_nodes]
     result = tx.run("""
         UNWIND $nodes as node
@@ -31,8 +36,10 @@ def _cyclomatic_complexity(tx):
     [r] = result.data()
     cc = r["cc"] + 1
     summary = result.consume()
-    return cc
 
+    if verbose:
+        print(f"Cyclomatic complexity: {cc}\t[{summary.result_available_after} ms]")
+    return cc
 
 
 # LCOM4 class cohesion: lack of cohesion in methods
@@ -47,9 +54,6 @@ def count_connected_components(pot_rel_methods, all_methods):
             # If they have at least one common element or the element is a class-level method
             if len(pot_rel_methods[keys[i]] & pot_rel_methods[keys[j]]) > 0 or keys[i] in all_methods:
                 G.add_edge(keys[i], keys[j])
-
-    # for comp in nx.connected_components(G):
-    #     print("CONNECTED COMP", comp)
     return nx.number_connected_components(G)
 
 def _get_empty_methods(tx):
@@ -91,7 +95,7 @@ def _get_all_class_methods(tx):
     
     return all_class_methods
 
-def _lcom4(tx, all_class_methods, empty_class_methods):
+def _lcom4(tx, all_class_methods, empty_class_methods, verbose = False):
     result = tx.run("""
         MATCH (class:Node {name:"ClassDef"}) -[:Child]-> 
             (func:Node {name:"FunctionDef"}) -[:Child*0..]-> 
@@ -116,14 +120,22 @@ def _lcom4(tx, all_class_methods, empty_class_methods):
         
         classes[class_name][function_name].add(attr_name)
 
-    print("LCOM4:")
+    if verbose:
+        print("LCOM4:")
     for clss in classes.items():
         name = clss[0]
         functions = clss[1]
         con_comp = count_connected_components(functions, all_class_methods[name])
         non_rel = len(all_class_methods[name]) - len(functions)
         empty = empty_class_methods[name]
-        print(f'\t{clss[0]}: {con_comp + non_rel - empty}')
+
+        if verbose:
+            print(f'\t{clss[0]}: {con_comp + non_rel - empty}')
+        
+    # print(classes)
+    # print(r)
+    # print(f'{r["class.value"]} -> {r["func.value"]} -> {r["attr.value"]}')
+    
    
 
 # Code duplication
@@ -157,7 +169,7 @@ def hash_subtree(subtree):
         str += concat_node_attributes(n)
     return zlib.crc32(bytearray(str, 'utf-8'))
 
-def _duplicates(tx):
+def _duplicates(tx, verbose = False):
     # 1 to not consider leaves
     result = tx.run("""
         MATCH path=(a:Node)-[r:Child*1..]->(b:Node)
@@ -187,13 +199,15 @@ def _duplicates(tx):
             clones[hash] = []
         clones[hash].append(i)
 
-    print("Duplicates:")
+    if verbose:
+        print("Duplicates:")
     for trees in clones.values():
         if len(trees) > 1:
             lines = ''
             for t in range(len(trees)):
                 lines += str(trees[t][0]["lineno"]) + " "
-            print(f"\tOn lines: {lines}")
+            if verbose:
+                print(f"\tOn lines: {lines}")
 # Coverage
 
 
