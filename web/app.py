@@ -96,7 +96,9 @@ def webhook():
     try:
         g = Granalys(conf.neo4j_uri, conf.neo4j_auth, conf.neo4j_db)
     except:
-        logging.error("Failed to execute analysis.")
+        logging.error("Failed to initialize Granalys.")
+        resp_data['state'] = 'failure'
+        resp_data['description'] = "Failed to analyze files."
         shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
         return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
 

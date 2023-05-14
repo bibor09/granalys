@@ -17,8 +17,8 @@ class Granalys:
         except ValueError:
             logging.error(f"Failed to connect to Neo4j on {uri}")
             sys.exit()
-        except exceptions.AuthError:
-            logging.error("Failed to connect to Neo4j because of bad credentials")
+        except exceptions.AuthError as e:
+            logging.error("Failed to connect to Neo4j because of bad credentials", e)
             sys.exit()
 
         if self.verbose:
@@ -76,8 +76,7 @@ class Granalys:
                     while alive:
                         command = input(">> ")
                         if command == "help":
-                            
-                            logging.info(help)
+                            print(help)
 
                         if command == "comment":
                             try:
@@ -135,7 +134,7 @@ class Granalys:
                         cc = session.execute_read(_cyclomatic_complexity)
 
                         with open(f"{base}/{f}", "r") as file:
-                            stats[f] = {"comment":comment_rat, "complexity": cc, "content": file.read()}
+                            stats[f] = {"comment": comment_rat, "complexity": cc, "content": file.read()}
                         
                         self.delete_graph(session)
                         self.close()
@@ -187,8 +186,8 @@ class Granalys:
         s = time.time()
         all_class_methods = session.execute_read(_get_all_class_methods)
         empty_class_methods = session.execute_read(_get_empty_methods)
-        session.execute_read(_lcom4, all_class_methods, empty_class_methods, verbose = False)
+        session.execute_read(_lcom4, all_class_methods, empty_class_methods, verbose)
         e = time.time()
         ms = int((e-s) * 1000)
         if verbose:
-            logging.info(f"\t[{ms} ms]")
+            print(f"\t[{ms} ms]")
