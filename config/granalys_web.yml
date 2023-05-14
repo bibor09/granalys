@@ -1,0 +1,12 @@
+neo4j.db: neo4j
+neo4j.uri: neo4j://localhost:7687
+neo4j.user: neo4j
+neo4j.passwd: 334yBQUaX2JdrCZ
+
+mongodb.url: localhost
+mongodb.port: 27017
+mongodb.db: analyses
+
+granalys.web.url: https://83d0-2a02-2f0e-10e-5d00-50e6-834-2b1b-2d2a.ngrok-free.app
+
+github.auth.token: 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

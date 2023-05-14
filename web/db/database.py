@@ -12,7 +12,6 @@ class Database:
     
     def save(self, coll_name, entity: BaseModel):
         collection = self.get_coll(coll_name)
-        print("Saved", entity)
         return collection.insert_one(entity.dict())
 
     def get(self, coll_name, attributes: dict):

@@ -1,31 +1,43 @@
-
 from flask import Flask, request, render_template, Response
 from http import HTTPStatus
 import requests
 import os
+import sys
 import stat
 import shutil
+import logging
+from datetime import datetime
 from git import Repo
 from db.database import Database
 from db.models import Analysis
 from business import Business
-from datetime import datetime
-from src_cpy.analyzer import analyze_files
-from config import get_config
 
+current = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.dirname(current)+"/config")
+sys.path.append(os.path.dirname(current)+"/analyzer")
+from config import Config
+from analyzer import Granalys
+
+
+conf = Config("web")
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
-db = Database('localhost', 27017, name='analyses')
+db = Database(conf.mongo_url, conf.mongo_port, name=conf.mongo_db)
 bs = Business(db)
-GITHUB_TOKEN = get_config()["github.auth.token"]
-URL = "https://83d0-2a02-2f0e-10e-5d00-50e6-834-2b1b-2d2a.ngrok-free.app"
 
+GITHUB_TOKEN = conf.github_auth_token
+URL = conf.granalys_web_url
+
+'''
+    Web template displaying push event statistics.
+'''
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
     url_base = f"{user}/{repo}"
     all_analyses = db.get_all('analysis', user, repo)
     curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id})
     return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base)
+
 
 '''
     Listens for push events on configured Github repository. Analyzes modified files, and sets event status.
@@ -36,12 +48,12 @@ def webhook():
     gd_id = request.headers.get('X-GitHub-Delivery')
 
     if not gd_id:
-        app.logger.error("Github push event has invalid header format.")
+        logging.error("Github push event has invalid header format.")
         return Response("Error: Github push event has invalid header format.", status = HTTPStatus.BAD_REQUEST)       
         
     # Get payload information
     if 'ref' not in payload or 'repository' not in payload or 'full_name' not in payload['repository'] or 'clone_url' not in payload['repository'] or 'commits' not in payload:
-        app.logger.error("Github push event has invalid payload format.")
+        logging.error("Github push event has invalid payload format.")
         return Response("Error: Github push event has invalid payload format.", status = HTTPStatus.BAD_REQUEST)
     
     branch = payload['ref'].split('/')[-1]
@@ -61,9 +73,9 @@ def webhook():
     try:
         Repo.clone_from(url=clone_url, to_path=base)
         repo = Repo(path=base)
-        app.logger.info("Repository was cloned successfully.")
+        logging.info("Repository was cloned successfully.")
     except Exception as e:
-        app.logger.error("Failed to clone repository.")
+        logging.error("Failed to clone repository.")
         resp_data['state'] = 'failure'
         resp_data['description'] = 'Failed to clone repository.'
         shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
@@ -72,21 +84,27 @@ def webhook():
     # Checkout current branch
     try:
         repo.git.checkout(branch)
-        app.logger.info("Branch checked out successfully.")
     except:
-        app.logger.error(f"Failed to check out branch '{branch}'.")
+        logging.error(f"Failed to check out branch '{branch}'.")
         resp_data['state'] = 'failure'
         resp_data['description'] = 'Failed to check out branch.'
         shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
         return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
         
     # Execute analysis
-    # TODO: error handling
-    stats_all = analyze_files(base, files)
+    logging.info("Analyzing files ...")
+    try:
+        g = Granalys(conf.neo4j_uri, conf.neo4j_auth, conf.neo4j_db)
+    except:
+        logging.error("Failed to execute analysis.")
+        shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
+        return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
+
+    stats_all = g.analyze_files(base, files)
     repo.close()
 
     if not stats_all:
-        app.logger.error("Failed to analyze files.", e)
+        logging.error("Failed to analyze files.")
         resp_data['state'] = 'failure'
         resp_data['description'] = 'Failed to analyze files.'
         shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
@@ -107,15 +125,14 @@ def webhook():
     resp_data['description'] = "Analysis completed."
     resp_data["target_url"] = resp_target_url
     response = requests.post(resp_url, headers=resp_headers, json=resp_data)
-    app.logger.info("Files analyzed successfully.")
+    logging.info("Files analyzed successfully.")
 
     # Cleanup
-    # TODO: error handling
     shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
     return response.json()
 
 def rm_dir_readonly(func, path, _):
-    "Clear the readonly bit and reattempt the removal"
+    # Clear the readonly bit and reattempt the removal
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
@@ -131,5 +148,6 @@ def get_modified_files(commits):
                 files.remove(f)
     return files
 
-if __name__ == '__main__':
-    app.run()
+if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.INFO)
+    app.run(host="127.0.0.1", port=8080, debug=True)
