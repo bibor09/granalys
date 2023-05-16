@@ -6,6 +6,7 @@ import sys
 import stat
 import shutil
 import logging
+import re
 from datetime import datetime
 from git import Repo
 from db.database import Database
@@ -19,10 +20,10 @@ from config import Config
 from analyzer import Granalys
 
 
-conf = Config("web")
+conf = Config("web", "granalys_web.yml")
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
-db = Database(conf.mongo_url, conf.mongo_port, name=conf.mongo_db)
+db = Database(conf.mongo_url, conf.mongo_port, name=conf.mongo_db, username=conf.mongo_user, password=conf.mongo_passwd)
 bs = Business(db)
 
 GITHUB_TOKEN = conf.github_auth_token
@@ -59,7 +60,7 @@ def webhook():
     branch = payload['ref'].split('/')[-1]
     repo_name = payload['repository']['full_name']
     clone_url = payload['repository']['clone_url']
-    files = get_modified_files(payload['commits'])
+    files = get_modified_py_files(payload['commits'])
         
 
     # Build response header
@@ -138,13 +139,15 @@ def rm_dir_readonly(func, path, _):
     os.chmod(path, stat.S_IWRITE)
     func(path)
 
-def get_modified_files(commits):
+def get_modified_py_files(commits):
     files = set()
     for c in commits:
         for f in c["added"]:
-            files.add(f)
+            if re.match(".*\.py$", f):
+                files.add(f)
         for f in c["modified"]:
-            files.add(f)
+            if re.match(".*\.py$", f):
+                files.add(f)
         for f in c["removed"]:
             if f in files:
                 files.remove(f)
@@ -152,4 +155,4 @@ def get_modified_files(commits):
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    app.run(debug=True)

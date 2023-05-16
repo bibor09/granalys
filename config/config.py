@@ -4,16 +4,9 @@ import sys
 import logging
 
 class Config:
-    def __init__(self, mode):
-        dir = os.path.dirname(__file__)
-        if mode == "web":
-            rel_path = "granalys_web.yml"
-        else:
-            rel_path = "granalys_cmd.yml"
-        self.abs_file_path = os.path.join(dir, rel_path)
-
+    def __init__(self, mode, file):
         try:
-            with open(self.abs_file_path) as f:
+            with open(os.path.realpath(file)) as f:
                 data = load(f, Loader=loader.SafeLoader)
 
             self.neo4j_auth = data['neo4j.user'], data['neo4j.passwd']
@@ -26,6 +19,8 @@ class Config:
                 self.mongo_db = data['mongodb.db']
                 self.mongo_url = data['mongodb.url']
                 self.mongo_port = data['mongodb.port']
+                self.mongo_user = data['mongodb.user']
+                self.mongo_passwd = data['mongodb.passwd']
         except:
-            logging.error(f"Invalid configuration file {self.abs_file_path}")
+            logging.error(f"Invalid configuration file {os.path.realpath(file)}")
             sys.exit()        

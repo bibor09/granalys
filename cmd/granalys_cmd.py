@@ -2,10 +2,12 @@ import argparse
 import sys
 import os
 import logging
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/config")
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/analyzer")
-from config.config import Config
-from analyzer.analyzer import Granalys
+
+current = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.dirname(current)+"/config")
+sys.path.append(os.path.dirname(current)+"/analyzer")
+from config import Config
+from analyzer import Granalys
 
 
 parser = argparse.ArgumentParser(description='Granalys')
@@ -20,7 +22,7 @@ def main(args):
         logging.error(f"Invalid or non-existent file")
         sys.exit()
 
-    conf = Config("cmd")
+    conf = Config("cmd", "granalys_cmd.yml")
     instance = Granalys(conf.neo4j_uri, conf.neo4j_auth, conf.neo4j_db, True)
     instance.start_cmd(file)
     instance.close()

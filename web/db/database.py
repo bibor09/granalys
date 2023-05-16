@@ -2,9 +2,9 @@ from pymongo import MongoClient, errors, DESCENDING
 from pydantic import BaseModel
 
 class Database:
-    def __init__(self, host, port, name):
+    def __init__(self, host, port, name, username, password):
         self.name = name
-        self.client = MongoClient(host, port)
+        self.client = MongoClient(host, port, username=username, password=password)
         self.db = self.client[name]
 
     def get_coll(self, coll_name):

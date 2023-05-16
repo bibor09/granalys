@@ -27,7 +27,7 @@ class Granalys:
     def get_file_ast(self, filename):
         ast = get_ast(filename)
         if ast is None:
-            logging.error("Failed to parse ast of file.")
+            logging.error(f"Failed to parse ast of file {filename}.")
             sys.exit()
         self.nodes, self.edges, self.ast_str = ast
 
