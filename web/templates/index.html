@@ -15,8 +15,9 @@
 
   <!-- Custom -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/prism.css') }}"/>
   <script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
-  <!-- <script src="{{ url_for('static', filename='js/third-party/prism-python.js') }}"></script> -->
+  <script src="{{ url_for('static', filename='js/prism.js') }}"></script>
 
   <style>
     .bd-placeholder-img {
@@ -148,23 +149,23 @@
       <p class="px-2"><b>Date: </b>{{ curr_analysis.created }} </p>
 
       <!-- STATISTICS -->
-      <div id="statistics" class="d-flex flex-row p-3">
+      <div id="statistics" class="d-flex flex-row p-1">
         <!-- TEXT-->
         <div class="d-flex flex-column overflow-auto h-100 w-75 px-2">
-          {% for stat in curr_analysis.statistics_all %}
+          {% for stat_file in curr_analysis.statistics_all %}
             <div id="stat-box" class="d-flex flex-column px-1 py-1 mb-1">
-              <div id="stat-box-header"
+              <div id="stat-box-header?{{stat_file}}"
                 class="bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
                 <svg class="bi pe-none me-2" width="20" height="20">
                   <use xlink:href="#file" />
                 </svg>
-                {{ stat }}
+                {{ stat_file }}
               </div>
               <!-- stats -->
               <div id="stat-box-body" class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
                 <div class="row px-2">
-                  <p class="col"><b>Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat]["comment"] }}</p>
-                  <p class="col"><b>Code Compexity: </b>{{ curr_analysis.statistics_all[stat]["complexity"] }}</p>
+                  <p class="col"><b>Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat_file]["comment"] }}</p>
+                  <p class="col"><b>Code Compexity: </b>{{ curr_analysis.statistics_all[stat_file]["complexity"] }}</p>
                 </div>
                 <div class="row px-2">
                   <p class="col"><b>Other: </b> blablabla </p>
@@ -173,14 +174,16 @@
                 </div>
               </div>
             </div>
+          {% endfor %}
         </div>
 
         <!-- CODE -->
-        <div id="code-box" class="overflow-auto h-75 w-50 px-2 mx-4">
-          <pre class="language-python">{{ curr_analysis.statistics_all[stat]["content"] }}</pre>
+        {% for stat_file in curr_analysis.statistics_all %}
+        <div id="code-box?{{stat_file}}" class="h-100 w-75 px-2 mx-4">
+          <pre class="h-100"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
         </div>
-      </div>
-      {% endfor %}
+        {% endfor %}
+      </div> 
     </div>
 
   </div>

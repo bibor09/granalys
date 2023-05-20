@@ -114,11 +114,12 @@ def webhook():
         return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
 
     # Build Github push event statistics data
+    now = datetime.now()
     data = {'user': repo_name.split('/')[0], \
             'repo': repo_name.split('/')[1], \
             'branch': branch, \
             'gd_id': gd_id, \
-            'created': datetime.now(), \
+            'created': now.strftime("%Y-%m-%d %H:%M:%S"), \
             'statistics_all': stats_all}
     analysis = Analysis(**data)
     # TODO Error handling

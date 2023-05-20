@@ -134,7 +134,7 @@ class Granalys:
                         cc = session.execute_read(_cyclomatic_complexity)
 
                         with open(f"{base}/{f}", "r") as file:
-                            stats[f] = {"comment": comment_rat, "complexity": cc, "content": file.read()}
+                            stats[f] = {"comment": "{:.2f}".format(comment_rat), "complexity": "{:.2f}".format(cc), "content": file.read()}
                         
                         self.delete_graph(session)
                         self.close()

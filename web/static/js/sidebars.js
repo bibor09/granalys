@@ -7,17 +7,6 @@
   })
 })()
 
-function loadScript(url)
-{    
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    head.appendChild(script);
-}
-
-loadScript('/js/third-party/prism-python.js');
-
 /* Highlight actibve branch */
 const makeActive = function (e) {
   const clicked = e.target;
@@ -34,28 +23,50 @@ const makeActive = function (e) {
 };
 
 /* Display code on click */
-const toggleCodeDisplayOnCLick = () => {
-  const code = document.querySelector('#code-box');
-  if (code.style.display === '') {
-    code.style.display = 'block';
-  } else {
-    code.style.display = (code.style.display === 'none') ? 'block' : 'none';
-  }
+const toggleCodeDisplayOnCLick = (event) => {
+  const id = event.target.id
+  const statFileId = id.split('?')[1]
+
+  const other_codes = document.querySelectorAll(`[id^="code-box"]`);
+  other_codes.forEach(code => {
+    code.style.display = 'none';
+  });
+
+  const currentCode = document.querySelector(`[id="code-box?${statFileId}"]`);
+  currentCode.style.display = 'block';
 };
 
 const hideCodeOnClick = (event) => {
-  const code = document.querySelector('#code-box');
-  const header = document.querySelector('#stat-box-header');
-  if (event.target !== code && event.target !== header) {
-    code.style.display = 'none';
+  const id = event.target.id
+  const statFileId = id.split('?')[1]
+  const codes = document.querySelectorAll(`[id^="code-box"]`);
+
+  let isSuccsOfCodeOrPre = false
+  let anc = event.target;
+  while (anc !== null) {
+    if ( anc.tagName === "PRE" || anc.tagName === "CODE") {
+      isSuccsOfCodeOrPre = true;
+      break;
+    }
+    anc = anc.parentNode;
   }
+
+  codes.forEach(c => {
+    if (c.id.split('?')[1] !== statFileId && !isSuccsOfCodeOrPre) {
+      c.style.display = 'none';
+    }
+  });
+
 };
 
 /** Add event listeners on load */
 window.onload = () => {
   document.getElementById("sidebar").addEventListener("click", makeActive);
   
-  document.getElementById("stat-box-header").addEventListener('click', toggleCodeDisplayOnCLick);
+  const stat_headers = document.querySelectorAll(`[id^="stat-box-header"]`);
+  stat_headers.forEach((s)=>{
+    s.addEventListener('click', toggleCodeDisplayOnCLick);
+  });
 
   document.addEventListener('click', hideCodeOnClick);
 };
