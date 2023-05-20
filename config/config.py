@@ -2,11 +2,17 @@ from yaml import loader, load
 import os
 import sys
 import logging
+from decouple import config
 
 class Config:
     def __init__(self, mode, file):
+        if mode == "web":
+            abs_file_path = config('WEB_CONFIG') + f"/{file}"
+        else:
+            abs_file_path = config('CMD_CONFIG') + f"/{file}"
+
         try:
-            with open(os.path.realpath(file)) as f:
+            with open(abs_file_path) as f:
                 data = load(f, Loader=loader.SafeLoader)
 
             self.neo4j_auth = data['neo4j.user'], data['neo4j.passwd']

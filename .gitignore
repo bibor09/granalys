@@ -34,13 +34,6 @@ coverage.xml
 # Translations
 *.mo
 
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-
-# Rope
-.ropeproject
 
 # xmls
 *.xml
@@ -48,4 +41,6 @@ coverage.xml
 # ignore data folder
 /data
 /tmp
-/config/granalys*.yml
+/web/granalys_web.yml
+/cmd/granalys_cmd.yml
+.env
