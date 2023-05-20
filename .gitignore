@@ -34,11 +34,10 @@ coverage.xml
 # Translations
 *.mo
 
-
 # xmls
 *.xml
 
-# ignore data folder
+# ignore
 /data
 /tmp
 /web/granalys_web.yml
