@@ -1,6 +1,9 @@
 import networkx as nx
 import zlib
 
+'''
+Comemnt line ratio
+'''
 def _comment_ratio(tx, verbose = False):
     result = tx.run("""
         MATCH (n:Node {name: $comment})
@@ -21,8 +24,40 @@ def _comment_ratio(tx, verbose = False):
         print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
     
     return ratio
-    
 
+
+'''
+Number of variables declared in a method
+'''
+def _method_var_number(tx, verbose = False):
+    result = tx.run("""
+        MATCH (f:Node {name:"FunctionDef"}) -[:Child*1..]->(:Node {name:"Assign"})-[:Child]->(var:Node {name:"Name"})
+        WITH f, collect(distinct var.id) as vars
+        RETURN f.value as function, vars 
+        """)
+    r = result.data()
+    method_variables = r
+    summary = result.consume()
+    
+    variables = dict()
+    if verbose:
+        print("Number of declared variables:")
+    for row in method_variables:
+        function = row['function']
+        vars = row['vars']
+
+        if verbose:
+            print(f'\t{function}:\t{len(vars)} {vars}')
+
+        variables[function] = vars
+    
+    if verbose:
+        print(f"\t[{summary.result_available_after} ms]")
+    return variables
+
+'''
+Cycloamtic Complexity
+'''
 # calculate cyclomatic code complexity from ast, counting the predicate nodes: G(v) = d + 1
 decision_nodes = ["For", "AsyncFor", "While", "If", "And", "Or", "Try", "TryStar"]
 
@@ -42,6 +77,9 @@ def _cyclomatic_complexity(tx, verbose = False):
     return cc
 
 
+'''
+LCOM4
+'''
 # LCOM4 class cohesion: lack of cohesion in methods
 def count_connected_components(pot_rel_methods, all_methods):
    # Create a graph where each set(aka key) is represented by a vertex, and two vertices are connected by an edge if their corresponding sets have at least one common element.
@@ -56,11 +94,13 @@ def count_connected_components(pot_rel_methods, all_methods):
                 G.add_edge(keys[i], keys[j])
     return nx.number_connected_components(G)
 
+# Returns a dictionary of class names with their number of empty methods
+# Methods with only 'pass' or 'return' statement in them are considered empty
 def _get_empty_methods(tx):
     result = tx.run("""
         MATCH (c:Node {name:"ClassDef"}) 
             -[:Child]-> (f:Node {name:"FunctionDef"})
-            -[r:Child]->(p:Node)
+            -[r:Child]-> (p:Node)
         WITH c.value AS class, f.value AS func, collect(p.name) AS body
         RETURN class, func, body
         """)
@@ -78,66 +118,68 @@ def _get_empty_methods(tx):
             nr_of_empty_methods[class_name] += 1
     return nr_of_empty_methods    
 
+# Returns a dictionary of class names with their set of methods
 def _get_all_class_methods(tx):
     result = tx.run("""
         MATCH (class:Node {name:"ClassDef"}) -[:Child]-> (func:Node {name:"FunctionDef"})
-        RETURN class.value, func.value 
+        WITH class, collect(distinct func.value) as funcs
+        RETURN class.value as class, funcs
         """)
     r = result.data()
 
     all_class_methods = dict()
     for row in r:
-        class_name = row["class.value"]
-        function_name = row["func.value"]
-        if class_name not in all_class_methods.keys():
-            all_class_methods[class_name] = set()
-        all_class_methods[class_name].add(function_name)
+        class_name = row["class"]
+        funcs = row["funcs"]
+        all_class_methods[class_name] = set(funcs)
     
     return all_class_methods
 
+# Returns a dictionary of class names with their lcom4 value
 def _lcom4(tx, all_class_methods, empty_class_methods, verbose = False):
     result = tx.run("""
         MATCH (class:Node {name:"ClassDef"}) -[:Child]-> 
-            (func:Node {name:"FunctionDef"}) -[:Child*0..]-> 
-            (attr:Node {name:"Attribute"}) -[:Child]-> 
-            (:Node {id:"self"})
-        RETURN class.value, func.value, attr.value 
+                (func:Node {name:"FunctionDef"}) -[:Child*0..]-> 
+                (attr:Node {name:"Attribute"}) -[:Child]-> (:Node {id:"self"})
+        WITH class, func, collect(distinct attr.value) as attrs
+        RETURN class.value as class, func.value as func, attrs
         """)
     r = result.data()
 
     # Place in dict methods that are referencing class variable or class method
     classes = dict()
     for row in r:
-        class_name = row["class.value"]
-        function_name = row["func.value"]
-        attr_name = row["attr.value"]
+        class_name = row["class"]
+        function_name = row["func"]
+        attrs = row["attrs"]
         
         if class_name not in classes.keys():
             classes[class_name] = dict()
 
-        if function_name not in classes[class_name].keys():
-            classes[class_name][function_name] = set()
-        
-        classes[class_name][function_name].add(attr_name)
+        classes[class_name][function_name] = set(attrs)
 
+    lcom4 = dict()
     if verbose:
         print("LCOM4:")
-    for clss in classes.items():
-        name = clss[0]
-        functions = clss[1]
-        con_comp = count_connected_components(functions, all_class_methods[name])
-        non_rel = len(all_class_methods[name]) - len(functions)
-        empty = empty_class_methods[name]
+    for class_name, functions in classes.items():
+        # LCOM4 for a class = number of connected components + discrete methods - empty methods - 
+        con_comp = count_connected_components(functions, all_class_methods[class_name])
+        non_related = len(all_class_methods[class_name]) - len(functions)
+        empty = empty_class_methods[class_name]
 
+        lcom4[class_name] = con_comp + non_related - empty
+
+    for cl in all_class_methods.keys():
+        if cl not in lcom4.keys():
+            lcom4[cl] = 0               # Meaning that the particular class's methods are not using class attributes
         if verbose:
-            print(f'\t{clss[0]}: {con_comp + non_rel - empty}')
-        
-    # print(classes)
-    # print(r)
-    # print(f'{r["class.value"]} -> {r["func.value"]} -> {r["attr.value"]}')
-    
+            print(f'\t{cl}:\t{lcom4[cl]}')
    
+    return lcom4
 
+'''
+Code duplication
+'''
 # Code duplication
 def path_union(path1, path2):
     path1_nodeIds = set([n["nodeId"] for n in path1])
@@ -208,7 +250,4 @@ def _duplicates(tx, verbose = False):
                 lines += str(trees[t][0]["lineno"]) + " "
             if verbose:
                 print(f"\tOn lines: {lines}")
-# Coverage
-
-
 

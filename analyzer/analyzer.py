@@ -3,7 +3,7 @@ import time
 import logging
 from neo4j import GraphDatabase, exceptions
 from ast_parser import get_ast
-from measure import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, _get_all_class_methods, _get_empty_methods
+from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, _get_all_class_methods, _get_empty_methods, _method_var_number
 
 class Granalys:
     def __init__(self, uri, auth, db, verbose = False):
@@ -14,8 +14,8 @@ class Granalys:
         try:
             self.driver = GraphDatabase.driver(uri, auth=auth)
             self.driver.verify_connectivity()
-        except ValueError:
-            logging.error(f"Failed to connect to Neo4j on {uri}")
+        except ValueError as e:
+            logging.error(f"Failed to connect to Neo4j on {uri}", e)
             sys.exit()
         except exceptions.AuthError as e:
             logging.error("Failed to connect to Neo4j because of bad credentials", e)
@@ -43,8 +43,8 @@ class Granalys:
     def create_graph(self, session):
         try:
             session.execute_write(self._create_graph, self.nodes, self.edges, self.verbose)
-        except:
-            logging.error("Failed to create graph.")
+        except Exception as e:
+            logging.error("Failed to create graph.", e)
             sys.exit()
 
     def delete_graph(self, session):
@@ -67,6 +67,7 @@ class Granalys:
                             "exit\t\t:Exit tool\n" +\
                             "\nMetrics:\n" +\
                             "comment\t\t:Comment line ratio of file\n" +\
+                            "vars\t\t:Number of variables declared per methods\n" +\
                             "complexity\t:Cyclomatic complexity of file\n" +\
                             "lcom4\t\t:Lack of Cohesion in Method measure per classes in file\n" +\
                             "duplicates\t:Duplicates in file\n" 
@@ -83,6 +84,13 @@ class Granalys:
                                 session.execute_read(_comment_ratio, self.verbose)
                             except:
                                 logging.error("Failed to execute comment measure")
+                                alive = False
+
+                        if command == "vars":
+                            try:
+                                session.execute_read(_method_var_number, self.verbose)
+                            except:
+                                logging.error("Failed to execute variable number measure")
                                 alive = False
                                 
                         elif command == "complexity":
@@ -132,13 +140,20 @@ class Granalys:
 
                         comment_rat = session.execute_read(_comment_ratio)
                         cc = session.execute_read(_cyclomatic_complexity)
+                        vars = session.execute_read(_method_var_number)
+                        lcom4 = self.lcom4(session, self.verbose)
 
                         with open(f"{base}/{f}", "r") as file:
-                            stats[f] = {"comment": "{:.2f}".format(comment_rat), "complexity": "{:.2f}".format(cc), "content": file.read()}
+                            stats[f] = {"comment": "{:.2f}".format(comment_rat), 
+                                        "complexity": "{:.2f}".format(cc), 
+                                        "vars": self.get_str_of_vars(vars),
+                                        "lcom4": self.get_str_of_lcom4(lcom4),
+                                        "content": file.read()}
                         
                         self.delete_graph(session)
                         self.close()
-                except:
+                except Exception as e:
+                    print(e)
                     return None
         except:
             return None
@@ -186,8 +201,24 @@ class Granalys:
         s = time.time()
         all_class_methods = session.execute_read(_get_all_class_methods)
         empty_class_methods = session.execute_read(_get_empty_methods)
-        session.execute_read(_lcom4, all_class_methods, empty_class_methods, verbose)
+        result = session.execute_read(_lcom4, all_class_methods, empty_class_methods, verbose)
         e = time.time()
         ms = int((e-s) * 1000)
         if verbose:
             print(f"\t[{ms} ms]")
+        return result
+
+    @staticmethod
+    def get_str_of_vars(vars):
+        str = ''
+        for key, value in vars.items():
+            str += f"<br><b>{key}</b>: {len(value)} ({', '.join([v for v in value])})"
+            str.replace(",)",")")
+        return str
+    
+    @staticmethod
+    def get_str_of_lcom4(lcom4):
+        str = ''
+        for key, value in lcom4.items():
+            str += f"<br><b>{key}</b>: {value}"
+        return str
