@@ -82,10 +82,6 @@ def get_ast(filename):
             tree = astc.parse(source)
             ast_str = astc.dump(tree, indent=2)
             visitor.visit(tree)
-
-            # for node in visitor.edges.keys():
-            #     print(node.name, node.nodeId, node.id, node.depth, node.value)
             return visitor.nodes, visitor.edges, ast_str
-    except Exception as e:
-        print(e)
+    except:
         return None

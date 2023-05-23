@@ -12,20 +12,35 @@ def _comment_ratio(tx, verbose = False):
         RETURN comment_nr, max(nn.lineno) as lines_nr
         """, comment="Comment")
     [r] = result.data()
+    summary = result.consume()
     comment_nr = r["comment_nr"]
     lines_nr = r["lines_nr"]
 
     if lines_nr != 0:
         ratio = comment_nr/lines_nr
+        if verbose:
+            print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
     else:
         ratio = "empty file"
-    summary = result.consume()
-
-    if verbose:
-        print(f"Comment ratio: {comment_nr}/{lines_nr} = \
-              {ratio}\t[{summary.result_available_after} ms]")
-    
+        if verbose:
+            print(f"Comment ratio: {ratio}\t[{summary.result_available_after} ms]")
     return ratio
+
+
+'''
+Number of variables declared in a method
+'''
+def _loc(tx, verbose = False):
+    result = tx.run("""
+        MATCH(n:Node)
+        RETURN max(n.lineno) as line    
+        """) 
+    [r] = result.data()
+    summary = result.consume()
+    loc = r["line"]
+    if verbose:
+        print(f"LOC: {loc}\t[{summary.result_available_after} ms]")
+    return loc
 
 
 '''
@@ -55,6 +70,68 @@ def _method_var_number(tx, verbose = False):
     if verbose:
         print(f"\t[{summary.result_available_after} ms]")
     return variables
+
+
+'''
+Efferent coupling
+'''
+def _efferent_coupling(tx, verbose = False):
+    # Get all classes, then look for every class calling inside of a class
+    result = tx.run("""
+        MATCH (c:Node {name:"ClassDef"})
+        WITH collect(c.value) as classes
+        UNWIND classes as called
+        MATCH (cl1:Node {name:"ClassDef"})-[:Child*1..]->({name:"Call"})-[]->(cl2:Node {name:"Name", id:called})
+        RETURN cl1.value as calling, collect(distinct cl2.id) as called
+        """)
+    r = result.data()
+    summary = result.consume()
+
+    ec = dict()
+    if verbose:
+        print("Efferent Coupling:")
+
+    for row in r:
+        calling = row["calling"]
+        called = row["called"]
+        ec[calling] = len(called)
+        if verbose:
+            print(f'\t{calling}:\t{ec[calling]}')
+    
+    if verbose:
+        print(f"\t[{summary.result_available_after} ms]")
+    return ec
+
+
+'''
+Afferent coupling
+'''
+def _afferent_coupling(tx, verbose = False):
+    result = tx.run("""
+        MATCH (c:Node {name:"ClassDef"})
+        WITH collect(c.value) as classes
+        UNWIND classes as called
+        MATCH (cl1:Node {name:"ClassDef"})-[:Child*1..]->({name:"Call"})-[]->(cl2:Node {name:"Name", id:called})
+        RETURN collect(cl1.value) as calling, cl2.id as called
+        """)
+    r = result.data()
+    summary = result.consume()
+
+    ac = dict()
+    if verbose:
+        print("Afferent Coupling:")
+
+    for row in r:
+        calling = row["calling"]
+        called = row["called"]
+        ac[called] = len(calling)
+        if verbose:
+            print(f'\t{called}:\t{ac[called]}')
+    
+    if verbose:
+        print(f"\t[{summary.result_available_after} ms]")
+    return ac
+
 
 '''
 Cycloamtic Complexity

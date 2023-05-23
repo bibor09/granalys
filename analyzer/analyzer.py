@@ -3,7 +3,9 @@ import time
 import logging
 from neo4j import GraphDatabase, exceptions
 from ast_parser import get_ast
-from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, _get_all_class_methods, _get_empty_methods, _method_var_number
+from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, \
+_get_all_class_methods, _get_empty_methods, _method_var_number, _loc, _efferent_coupling, \
+_afferent_coupling
 
 class Granalys:
     def __init__(self, uri, auth, db, verbose = False):
@@ -67,8 +69,11 @@ class Granalys:
                             "exit\t\t:Exit tool\n" +\
                             "\nMetrics:\n" +\
                             "comment\t\t:Comment line ratio of file\n" +\
+                            "loc\t\t:Lines of code\n" +\
                             "vars\t\t:Number of variables declared per methods\n" +\
                             "complexity\t:Cyclomatic complexity of file\n" +\
+                            "ec\t\t:Efferent coupling of classes\n" +\
+                            "ac\t\tAfferent coupling of classes\n" +\
                             "lcom4\t\t:Lack of Cohesion in Method measure per classes in file\n" +\
                             "duplicates\t:Duplicates in file\n" 
                     print(help)
@@ -79,18 +84,39 @@ class Granalys:
                         if command == "help":
                             print(help)
 
-                        if command == "comment":
+                        elif command == "comment":
                             try:
                                 session.execute_read(_comment_ratio, self.verbose)
                             except:
                                 logging.error("Failed to execute comment measure")
                                 alive = False
 
-                        if command == "vars":
+                        elif command == "loc":
+                            try:
+                                session.execute_read(_loc, self.verbose)
+                            except:
+                                logging.error("Failed to execute loc measure")
+                                alive = False
+
+                        elif command == "vars":
                             try:
                                 session.execute_read(_method_var_number, self.verbose)
                             except:
                                 logging.error("Failed to execute variable number measure")
+                                alive = False
+
+                        elif command == "ec":
+                            try:
+                                session.execute_read(_efferent_coupling, self.verbose)
+                            except:
+                                logging.error("Failed to execute efferent coupling measure")
+                                alive = False
+                        
+                        elif command == "ac":
+                            try:
+                                session.execute_read(_afferent_coupling, self.verbose)
+                            except:
+                                logging.error("Failed to execute afferent coupling measure")
                                 alive = False
                                 
                         elif command == "complexity":
