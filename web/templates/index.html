@@ -164,20 +164,38 @@
               <!-- stats -->
               <div id="stat-box-body" class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
                 <div class="row px-2">
-                  <p class="col"><b id="metric-name" class="fs-6">Comment-line ratio: </b>{{ curr_analysis.statistics_all[stat_file]["comment"] }}</p>
-                  <p class="col"><b id="metric-name" class="fs-6">Code Compexity: </b>{{ curr_analysis.statistics_all[stat_file]["complexity"] }}</p>
-                  <p class="col"><b id="metric-name" class="fs-6">Lines of Code: </b>{{ curr_analysis.statistics_all[stat_file]["loc"] }}</p>
+                  <p class="col"><b id="metric-name" class="fs-6">Comment-line ratio: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["comment"] }}</span>
+                  </p>
+                  <p class="col"><b id="metric-name" class="fs-6">Code Compexity: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["complexity"] }}</span>
+                  </p>
+                  <p class="col"><b id="metric-name" class="fs-6">Lines of Code: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["loc"] }}</span>
+                  </p>
                 </div>
                 <div class="row px-2">
                   {% autoescape false %}
-                  <p class="col"><b id="metric-name" class="fs-6">Method variable number: </b> {{ curr_analysis.statistics_all[stat_file]["vars"] }} </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Efferent Coupling: </b> {{ curr_analysis.statistics_all[stat_file]["ec"] }} </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Afferent Coupling: </b>{{ curr_analysis.statistics_all[stat_file]["ac"] }}</p>
+                  <p class="col"><b id="metric-name" class="fs-6">Method variable number: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["vars"] }}</span>
+                  </p>
+                  <p class="col"><b id="metric-name" class="fs-6">Efferent Coupling: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["ec"] }}</span>
+                  </p>
+                  <p class="col"><b id="metric-name" class="fs-6">Afferent Coupling: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["ac"] }}</span>
+                  </p>
                   {% endautoescape %}
                 </div>
                 <div class="row px-2">
                   {% autoescape false %}
-                  <p class="col"><b id="metric-name" class="fs-6">LCOM4: </b>{{ curr_analysis.statistics_all[stat_file]["lcom4"] }}</p>
+                  <p class="col"><b id="metric-name" class="fs-6">LCOM4: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["lcom4"] }}</span>
+                  </p>
+                  <p class="col"><b id="metric-name" class="fs-6">Instability: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["inst"] }}</span>
+                  </p>
+                  <p class="col"><b id="metric-name" class="fs-6"></b></p>
                   {% endautoescape %}
                 </div>
               </div>
@@ -187,7 +205,7 @@
 
         <!-- CODE -->
         {% for stat_file in curr_analysis.statistics_all %}
-        <div id="code-box?{{stat_file}}" class="h-100 w-50 px-2 mx-4">
+        <div id="code-box?{{stat_file}}" class="h-100 w-75 px-2 mx-4">
           <pre class="h-100"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
         </div>
         {% endfor %}

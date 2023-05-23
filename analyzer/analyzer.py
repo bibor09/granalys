@@ -176,6 +176,7 @@ class Granalys:
                         cc = session.execute_read(_cyclomatic_complexity)
                         ec = session.execute_read(_efferent_coupling)
                         ac = session.execute_read(_afferent_coupling)
+                        inst = self.instability(session, self.verbose)
                         loc = session.execute_read(_loc)
                         vars = session.execute_read(_method_var_number)
                         lcom4 = self.lcom4(session, self.verbose)
@@ -186,6 +187,7 @@ class Granalys:
                                         "loc": f"{int(loc)}",
                                         "ec": self.get_str_of(ec),
                                         "ac": self.get_str_of(ac),
+                                        "inst": "{:.2f}".format(inst) if inst != "No classes" else inst,
                                         "vars": self.get_str_of_vars(vars),
                                         "lcom4": self.get_str_of(lcom4),
                                         "content": file.read()}
@@ -271,7 +273,7 @@ class Granalys:
     def get_str_of_vars(vars):
         str = ''
         for key, value in vars.items():
-            str += f"<br><i>{key}</i>: {len(value)} ({', '.join([v for v in value])})"
+            str += f"<br><b><i> -{key}</i></b>: {len(value)} ({', '.join([v for v in value])})"
             str.replace(",)",")")
         return str
     
@@ -279,5 +281,5 @@ class Granalys:
     def get_str_of(dict_str_nr):
         str = ''
         for key, value in dict_str_nr.items():
-            str += f"<br><i>{key}</i>: {value}"
+            str += f"<br><b><i> -{key}</i></b>: {value}"
         return str
