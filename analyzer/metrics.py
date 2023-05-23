@@ -328,4 +328,3 @@ def _duplicates(tx, verbose = False):
                 lines += str(trees[t][0]["lineno"]) + " "
             if verbose:
                 print(f"\tOn lines: {lines}")
-

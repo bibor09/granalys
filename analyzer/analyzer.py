@@ -73,7 +73,8 @@ class Granalys:
                             "vars\t\t:Number of variables declared per methods\n" +\
                             "complexity\t:Cyclomatic complexity of file\n" +\
                             "ec\t\t:Efferent coupling of classes\n" +\
-                            "ac\t\tAfferent coupling of classes\n" +\
+                            "ac\t\t:Afferent coupling of classes\n" +\
+                            "inst\t\t:Overall class instability\n" +\
                             "lcom4\t\t:Lack of Cohesion in Method measure per classes in file\n" +\
                             "duplicates\t:Duplicates in file\n" 
                     print(help)
@@ -117,6 +118,13 @@ class Granalys:
                                 session.execute_read(_afferent_coupling, self.verbose)
                             except:
                                 logging.error("Failed to execute afferent coupling measure")
+                                alive = False
+
+                        elif command == "inst":
+                            try:
+                                self.instability(session, self.verbose)
+                            except:
+                                logging.error("Failed to execute instability measure")
                                 alive = False
                                 
                         elif command == "complexity":
@@ -239,6 +247,25 @@ class Granalys:
         if verbose:
             print(f"\t[{ms} ms]")
         return result
+    
+    @staticmethod
+    def instability(session, verbose):
+        s = time.time()
+        ec = session.execute_read(_efferent_coupling)
+        ac = session.execute_read(_afferent_coupling)
+        Ce = sum([value for value in ec.values()])
+        Ca = sum([value for value in ac.values()])
+        e = time.time()
+        ms = int((e-s) * 1000)
+
+        if Ce == 0 and Ca == 0:
+            i = "No classes"
+        else:
+            i = Ce / (Ce + Ca)
+
+        if verbose:
+            print(f"Instability: {i}\t[{ms} ms]")
+        return i
 
     @staticmethod
     def get_str_of_vars(vars):
