@@ -57,6 +57,10 @@ body {
   height: 90%;
 }
 
+#metric-name {
+  color: #094fb9;
+}
+
 div[id^='code-box'] {
   display: none;
 }

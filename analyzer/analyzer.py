@@ -166,14 +166,20 @@ class Granalys:
 
                         comment_rat = session.execute_read(_comment_ratio)
                         cc = session.execute_read(_cyclomatic_complexity)
+                        ec = session.execute_read(_efferent_coupling)
+                        ac = session.execute_read(_afferent_coupling)
+                        loc = session.execute_read(_loc)
                         vars = session.execute_read(_method_var_number)
                         lcom4 = self.lcom4(session, self.verbose)
 
                         with open(f"{base}/{f}", "r") as file:
                             stats[f] = {"comment": "{:.2f}".format(comment_rat), 
-                                        "complexity": "{:.2f}".format(cc), 
+                                        "complexity": f"{int(cc)}", 
+                                        "loc": f"{int(loc)}",
+                                        "ec": self.get_str_of(ec),
+                                        "ac": self.get_str_of(ac),
                                         "vars": self.get_str_of_vars(vars),
-                                        "lcom4": self.get_str_of_lcom4(lcom4),
+                                        "lcom4": self.get_str_of(lcom4),
                                         "content": file.read()}
                         
                         self.delete_graph(session)
@@ -238,13 +244,13 @@ class Granalys:
     def get_str_of_vars(vars):
         str = ''
         for key, value in vars.items():
-            str += f"<br><b>{key}</b>: {len(value)} ({', '.join([v for v in value])})"
+            str += f"<br><i>{key}</i>: {len(value)} ({', '.join([v for v in value])})"
             str.replace(",)",")")
         return str
     
     @staticmethod
-    def get_str_of_lcom4(lcom4):
+    def get_str_of(dict_str_nr):
         str = ''
-        for key, value in lcom4.items():
-            str += f"<br><b>{key}</b>: {value}"
+        for key, value in dict_str_nr.items():
+            str += f"<br><i>{key}</i>: {value}"
         return str
