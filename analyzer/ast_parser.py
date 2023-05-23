@@ -56,7 +56,7 @@ class NodeVisitor(astc.NodeVisitor):
         else:
             value = None
 
-        return Node(self.nodeId, name, lineno, self.depth, id, value)
+        return Node(self.nodeId, name, lineno, id, value)
 
     def generic_visit(self, node):
         if self.parent not in self.nodes:
@@ -86,5 +86,6 @@ def get_ast(filename):
             # for node in visitor.edges.keys():
             #     print(node.name, node.nodeId, node.id, node.depth, node.value)
             return visitor.nodes, visitor.edges, ast_str
-    except:
+    except Exception as e:
+        print(e)
         return None
