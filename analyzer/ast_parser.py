@@ -29,9 +29,8 @@ class NodeVisitor(astc.NodeVisitor):
     def __init__(self):
         self.nodes: list[Node] = []
         self.edges = []
-        self.depth = -1
         self.nodeId = 0
-        self.parent = Node(nodeId=self.nodeId, name="ROOT", lineno=0, depth=self.depth, id=None, value=None)
+        self.parent = Node(nodeId=self.nodeId, name="ROOT", lineno=0, id=None, value=None)
         self.bodies = dict()
 
     def set_node(self, ast_node):
@@ -60,9 +59,6 @@ class NodeVisitor(astc.NodeVisitor):
         return Node(self.nodeId, name, lineno, self.depth, id, value)
 
     def generic_visit(self, node):
-        if "body" in node._fields:
-            self.depth += 1
-
         if self.parent not in self.nodes:
             self.nodes.append(self.parent)
 
@@ -74,8 +70,6 @@ class NodeVisitor(astc.NodeVisitor):
         self.parent = childNode
         astc.NodeVisitor.generic_visit(self, node)
 
-        if "body" in node._fields:
-            self.depth -= 1
         self.parent = saved_parent
 
 

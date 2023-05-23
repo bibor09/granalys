@@ -1,9 +1,8 @@
 class Node():
-    def __init__(self, nodeId, name, lineno, depth, id, value):
+    def __init__(self, nodeId, name, lineno, id, value):
         self.nodeId = nodeId
         self.name = name
         self.lineno = lineno
-        self.depth = depth
         self.id = id
         self.value = value
 

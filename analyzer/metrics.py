@@ -14,6 +14,7 @@ def _comment_ratio(tx, verbose = False):
     [r] = result.data()
     comment_nr = r["comment_nr"]
     lines_nr = r["lines_nr"]
+
     if lines_nr != 0:
         ratio = comment_nr/lines_nr
     else:
@@ -21,7 +22,8 @@ def _comment_ratio(tx, verbose = False):
     summary = result.consume()
 
     if verbose:
-        print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
+        print(f"Comment ratio: {comment_nr}/{lines_nr} = \
+              {ratio}\t[{summary.result_available_after} ms]")
     
     return ratio
 
@@ -35,8 +37,7 @@ def _method_var_number(tx, verbose = False):
         WITH f, collect(distinct var.id) as vars
         RETURN f.value as function, vars 
         """)
-    r = result.data()
-    method_variables = r
+    method_variables = result.data()
     summary = result.consume()
     
     variables = dict()
