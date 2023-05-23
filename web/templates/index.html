@@ -14,7 +14,8 @@
     crossorigin="anonymous"></script>
 
   <!-- Chart -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.js"></script>
+  
 
   <!-- Custom -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
@@ -218,13 +219,7 @@
       </div> 
 
       <!-- CHARTS -->
-      <div id="statistics-charts" class="px-2">
-        {% for stat_file in curr_analysis.statistics_all %}
-        <div>
-          <p id="file">file</p>
-          <canvas id="chart" class="h-50 w-75 f2-20"></canvas>
-        </div>
-        {% endfor %}
+      <div id="statistics-charts" class="d-flex flex-column overflow-auto px-2 h-75" data-chart="{{ file_stats_chart }}">
       </div>
 
     </div>

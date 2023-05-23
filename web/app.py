@@ -35,9 +35,13 @@ URL = conf.granalys_web_url
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
     url_base = f"{user}/{repo}"
-    all_analyses = db.get_all('analysis', user, repo)
-    curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id})
-    return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base)
+    all_analyses = db.get_all('analysis', user, repo)   #every branch
+    curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id}) #current branch, actual analysis
+
+    curr_analysis_date = curr_analysis['created']
+    file_stats_chart = bs.get_file_statistics_from_date('analysis', curr_analysis_date, curr_analysis)
+
+    return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base, file_stats_chart=file_stats_chart)
 
 
 '''
@@ -157,3 +161,4 @@ def get_modified_py_files(commits):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     app.run(debug=True)
+    db.close()

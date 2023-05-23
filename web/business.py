@@ -19,4 +19,10 @@ class Business:
     
     def save(self, coll_name, entity: BaseModel):
         return self.db.save(coll_name, entity)
+    
+    def get_file_statistics_from_date(self, coll_name, date, entity: BaseModel):
+        file_stats = dict()
+        for file in entity["statistics_all"].keys():
+            file_stats[file] = self.db.get_all_statistics_for_file(coll_name, entity["user"], entity["repo"], entity["branch"], date, file)      
+        return file_stats
 

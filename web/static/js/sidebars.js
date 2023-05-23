@@ -61,7 +61,7 @@ const hideCodeOnClick = (event) => {
   let isSuccsOfCodeOrPre = false
   let anc = event.target;
   while (anc !== null) {
-    if ( anc.tagName === "PRE" || anc.tagName === "CODE") {
+    if (anc.tagName === "PRE" || anc.tagName === "CODE") {
       isSuccsOfCodeOrPre = true;
       break;
     }
@@ -76,14 +76,80 @@ const hideCodeOnClick = (event) => {
 
 };
 
+const drawCharts = () => {
+  const statCharts = document.getElementById("statistics-charts");
+  const str_data = statCharts.dataset.chart.replaceAll("'", '"');
+  const chart_data = JSON.parse(str_data);
+
+  var files = Object.keys(chart_data);
+
+  files.forEach((file) => {
+    const div = document.createElement("div");
+    div.className = "w-75 shadow";
+
+    const chart_name = document.createElement("p");
+    chart_name.innerText = file;
+    chart_name.className = "bg-success bg-gradient p-1 mb-1 rounded-1 text-wrap text-break text-white fs-6"; 
+
+    const chart_box = document.createElement("p");
+    chart_box.className = "d-flex flex-row p-1";
+
+    const canvas = document.createElement("canvas");
+    canvas.id = `chart?${file}`;
+    canvas.className = "w-100 p-1";
+
+    // const information = document.createElement("ul");
+    // information.className = "p-3 m-3 ms-auto"
+    // information.innerHTML = "<li>comments</li> <li>lines of code</li> <li>complexity</li> <li>instability</li>";
+
+    chart_box.appendChild(canvas);
+    div.appendChild(chart_name);
+    div.appendChild(chart_box);
+    statCharts.appendChild(div);
+
+    // draw charts
+    const dates = chart_data[file]["created"];
+
+    const chart = new Chart(canvas, {
+      type: "line",
+      data: {
+        labels: dates,
+        datasets: [{
+          data: chart_data[file]["comment"],
+          borderColor: "red",
+          label: "comments",
+          fill: false
+        }, {
+          data: chart_data[file]["loc"],
+          borderColor: "green",
+          label: "lines of code",
+          fill: false
+        }, {
+          data: chart_data[file]["complexity"],
+          borderColor: "blue",
+          label: "cyclomatic complexity",
+          fill: false
+        }, {
+          data: chart_data[file]["inst"],
+          borderColor: "purple",
+          label: "instability",
+          fill: false
+        }]
+      },
+      options: {
+        legend: { display: false }
+      }
+    });
+  })
+};
 
 
 /** Add event listeners on load */
 window.onload = () => {
   document.getElementById("sidebar").addEventListener("click", makeActive);
-  
+
   const stat_headers = document.querySelectorAll(`[id^="stat-box-header"]`);
-  stat_headers.forEach((s)=>{
+  stat_headers.forEach((s) => {
     s.addEventListener('click', toggleCodeDisplayOnCLick);
   });
 
@@ -91,28 +157,6 @@ window.onload = () => {
 
   document.addEventListener('change', changeDisplay);
 
-  const xValues = [100,200,300,400,500,600,700,800,900,1000];
+  drawCharts();
 
-  const myChart = new Chart("chart", {
-    type: "line",
-    data: {
-      labels: xValues,
-      datasets: [{
-        data: [860,1140,1060,1060,1070,1110,1330,2210,7830,2478],
-        borderColor: "red",
-        fill: false
-      },{
-        data: [1600,1700,1700,1900,2000,2700,4000,5000,6000,7000],
-        borderColor: "green",
-        fill: false
-      },{
-        data: [300,700,2000,5000,6000,4000,2000,1000,200,100],
-        borderColor: "blue",
-        fill: false
-      }]
-    },
-    options: {
-      legend: {display: false}
-    }
-  });
 };

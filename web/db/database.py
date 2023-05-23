@@ -7,6 +7,9 @@ class Database:
         self.client = MongoClient(host, port, username=username, password=password)
         self.db = self.client[name]
 
+    def close(self):
+        self.client.close()
+
     def get_coll(self, coll_name):
         return self.db[coll_name]
     
@@ -35,6 +38,39 @@ class Database:
         result = collection.find_one(attributes)
         return result["gd_id"]
     
+    def get_all_statistics_for_file(self, coll_name, user, repo, branch, curr_date, file):
+        collection = self.get_coll(coll_name)
+        result = collection.find({
+            "user": user,
+            "repo": repo,
+            "branch": branch,
+            "created": {"$lte": curr_date}
+        })
+        statistics = {"comment": [], "complexity": [], "inst": [], "loc": [], "created": []}
+        
+        for entity in result:
+            try:
+                file_stat = entity["statistics_all"][file]
+            except:
+                continue
+
+            comment_ratio = float(file_stat["comment"])
+            loc = int(file_stat["loc"])
+            complexity = int(file_stat["complexity"])
+            if type(file_stat["inst"]) == str:
+                inst = 0.0
+            else:
+                inst = float(file_stat["inst"])
+
+            statistics["comment"].append(comment_ratio*loc)
+            statistics["loc"].append(loc)
+            statistics["complexity"].append(complexity)
+            statistics["inst"].append(inst)
+            statistics["created"].append(entity["created"].strftime("%Y-%m-%d %H:%M:%S"))
+
+        return statistics
+
+
     def get_all(self, coll_name, user, repo):
         collection = self.get_coll(coll_name)
         pipeline = [
@@ -60,3 +96,4 @@ class Database:
         result = [{"branch":r["_id"], "gd_id": self.get_gd_id("analysis", {"user":user, "repo":repo, "branch":r["_id"], "created":r["created"]})} for r in result]
         result.sort(key=lambda x: x["branch"])
         return result
+    
