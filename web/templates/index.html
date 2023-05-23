@@ -13,6 +13,9 @@
     integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
     crossorigin="anonymous"></script>
 
+  <!-- Chart -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
   <!-- Custom -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/prism.css') }}"/>
@@ -137,12 +140,13 @@
 
     <!-- MEASURES -->
     <div id="measure" class="container px-4 py-5 h-100">
+      <!-- HEADER -->
       <div id="measure-header" class="d-flex flex-row">
-        <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Measures</h2>
+        <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Metrics</h2>
         <div class="p-2">
-          <select class="form-select text-white bg-secondary" aria-label="method">
+          <select id="choose-display" class="form-select text-white bg-secondary" aria-label="method">
             <option value="files" selected>Files</option>
-            <option value="overall">Overall</option>
+            <option value="charts">Charts</option>
           </select>
         </div>
       </div>
@@ -151,7 +155,7 @@
       <!-- STATISTICS -->
       <div id="statistics" class="d-flex flex-row p-1">
         <!-- TEXT-->
-        <div class="d-flex flex-column overflow-auto h-100 w-75 px-2">
+        <div class="d-flex flex-column overflow-auto h-100 w-100 px-2">
           {% for stat_file in curr_analysis.statistics_all %}
             <div id="stat-box" class="d-flex flex-column px-1 py-1 mb-1">
               <div id="stat-box-header?{{stat_file}}"
@@ -204,14 +208,27 @@
         </div>
 
         <!-- CODE -->
+        <div class="w-50">
+          {% for stat_file in curr_analysis.statistics_all %}
+          <div id="code-box?{{stat_file}}" class="h-100 w-100 px-2 mx-4">
+            <pre class="h-100"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
+          </div>
+          {% endfor %}
+        </div>
+      </div> 
+
+      <!-- CHARTS -->
+      <div id="statistics-charts" class="px-2">
         {% for stat_file in curr_analysis.statistics_all %}
-        <div id="code-box?{{stat_file}}" class="h-100 w-75 px-2 mx-4">
-          <pre class="h-100"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
+        <div>
+          <p id="file">file</p>
+          <canvas id="chart" class="h-50 w-75 f2-20"></canvas>
         </div>
         {% endfor %}
-      </div> 
-    </div>
+      </div>
 
+    </div>
+    
   </div>
 </body>
 

@@ -185,11 +185,11 @@ class Granalys:
                             stats[f] = {"comment": "{:.2f}".format(comment_rat), 
                                         "complexity": f"{int(cc)}", 
                                         "loc": f"{int(loc)}",
-                                        "ec": self.get_str_of(ec),
-                                        "ac": self.get_str_of(ac),
-                                        "inst": "{:.2f}".format(inst) if inst != "No classes" else inst,
+                                        "ec": self.get_str_of(ec) if len(ec) > 0 else "No coupling",
+                                        "ac": self.get_str_of(ac) if len(ac) > 0 else "No coupling",
+                                        "inst": "{:.2f}".format(inst) if type(inst) != str else inst,
                                         "vars": self.get_str_of_vars(vars),
-                                        "lcom4": self.get_str_of(lcom4),
+                                        "lcom4": self.get_str_of(lcom4) if len(lcom4) > 0 else "No classes",
                                         "content": file.read()}
                         
                         self.delete_graph(session)
@@ -261,7 +261,7 @@ class Granalys:
         ms = int((e-s) * 1000)
 
         if Ce == 0 and Ca == 0:
-            i = "No classes"
+            i = "No coupling"
         else:
             i = Ce / (Ce + Ca)
 
@@ -273,8 +273,7 @@ class Granalys:
     def get_str_of_vars(vars):
         str = ''
         for key, value in vars.items():
-            str += f"<br><b><i> -{key}</i></b>: {len(value)} ({', '.join([v for v in value])})"
-            str.replace(",)",")")
+            str += f"<br><b><i> -{key}</i></b>: {len(value)}"
         return str
     
     @staticmethod

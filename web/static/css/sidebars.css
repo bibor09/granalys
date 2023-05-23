@@ -74,3 +74,7 @@ div[id^='stat-box-header']:hover {
   background-color: #094fb9;
   transform: scale(1.02);
 }
+
+#statistics-charts {
+  display: none !important;
+}
