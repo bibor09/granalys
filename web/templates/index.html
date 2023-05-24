@@ -152,6 +152,41 @@
         </div>
       </div>
       <p class="px-2"><b>Date: </b>{{ curr_analysis.created }} </p>
+      <!-- Checkboxes -->
+      <div class="d-flex flex-wrap">
+        <div class="px-3">
+          <input type="checkbox" id="check?comment" class="" checked>
+          <label>Comment-line ratio</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?complexity" class="" checked>
+          <label>Cyclomatic Complexity</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?loc" class="" checked>
+          <label>Lines of Code</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?vars" class="" checked>
+          <label>Method variable number</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?ec" class="" checked>
+          <label>Efferent Coupling</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?ac" class="" checked>
+          <label>Afferent Coupling</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?lcom4" class="" checked>
+          <label>LCOM4</label>
+        </div>
+        <div class="px-3"> 
+          <input type="checkbox" id="check?inst" class="" checked>
+          <label>Instability</label>
+        </div>
+      </div>
 
       <!-- STATISTICS -->
       <div id="statistics" class="d-flex flex-row p-1">
@@ -169,38 +204,38 @@
               <!-- stats -->
               <div id="stat-box-body" class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
                 <div class="row px-2">
-                  <p class="col"><b id="metric-name" class="fs-6">Comment-line ratio: </b>
+                  <p id="metric?comment" class="col"><b id="metric-name" class="fs-6">Comment-line ratio: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["comment"] }}</span>
                   </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Code Compexity: </b>
+                  <p id="metric?complexity" class="col"><b id="metric-name" class="fs-6">Code Compexity: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["complexity"] }}</span>
                   </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Lines of Code: </b>
+                  <p id="metric?loc" class="col"><b id="metric-name" class="fs-6">Lines of Code: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["loc"] }}</span>
                   </p>
                 </div>
                 <div class="row px-2">
                   {% autoescape false %}
-                  <p class="col"><b id="metric-name" class="fs-6">Method variable number: </b>
+                  <p id="metric?vars" class="col"><b id="metric-name" class="fs-6">Method variable number: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["vars"] }}</span>
                   </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Efferent Coupling: </b>
+                  <p id="metric?ec" class="col"><b id="metric-name" class="fs-6">Efferent Coupling: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["ec"] }}</span>
                   </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Afferent Coupling: </b>
+                  <p id="metric?ac" class="col"><b id="metric-name" class="fs-6">Afferent Coupling: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["ac"] }}</span>
                   </p>
                   {% endautoescape %}
                 </div>
                 <div class="row px-2">
                   {% autoescape false %}
-                  <p class="col"><b id="metric-name" class="fs-6">LCOM4: </b>
+                  <p id="metric?lcom4" class="col"><b id="metric-name" class="fs-6">LCOM4: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["lcom4"] }}</span>
                   </p>
-                  <p class="col"><b id="metric-name" class="fs-6">Instability: </b>
+                  <p id="metric?inst" class="col"><b id="metric-name" class="fs-6">Instability: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["inst"] }}</span>
                   </p>
-                  <p class="col"><b id="metric-name" class="fs-6"></b></p>
+                  <p id="metric?" class="col"><b id="metric-name" class="fs-6"></b></p>
                   {% endautoescape %}
                 </div>
               </div>

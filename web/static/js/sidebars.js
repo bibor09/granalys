@@ -219,6 +219,13 @@ const redrawCharts = (event, chart_data, charts) => {
   })
 };
 
+// ------------- CHECKBOXES -----------
+const displayMetrics = (event) => {
+  const idk = document.getElementById('metric?comment');
+  const idk2 = document.getElementById('check?comment');
+
+};
+
 // ------------- ON LOAD --------------
 /** Add event listeners on load */
 window.onload = () => {
