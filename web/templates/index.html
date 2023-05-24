@@ -140,10 +140,10 @@
     </div>
 
     <!-- MEASURES -->
-    <div id="measure" class="container px-4 py-5 h-100">
+    <div id="measure" class="container px-4 py-4 h-100">
       <!-- HEADER -->
       <div id="measure-header" class="d-flex flex-row">
-        <h2 class="pb-2 p-2 flex-grow-1 border-bottom">Metrics</h2>
+        <h2 class="pb-2 px-2 flex-grow-1 border-bottom">Metrics</h2>
         <div class="p-2">
           <select id="choose-display" class="form-select text-white bg-secondary" aria-label="method">
             <option value="files" selected>Files</option>
@@ -219,7 +219,15 @@
       </div> 
 
       <!-- CHARTS -->
-      <div id="statistics-charts" class="d-flex flex-column overflow-auto px-2 h-75" data-chart="{{ file_stats_chart }}">
+      <div id="chart-main" class="d-flex flex-row p-1">
+        <!-- charts -->
+        <div id="statistics-charts" class="d-flex flex-column overflow-auto px-2" data-chart="{{ file_stats_chart }}"></div>
+        <!-- select date -->
+        <div class="m-3">
+          <select id="choose-date" class="form-select" aria-label="method">
+            <option selected>Show from Date</option>
+          </select>
+        </div>
       </div>
 
     </div>

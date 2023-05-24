@@ -54,7 +54,7 @@ body {
 }
 
 #statistics {
-  height: 90%;
+  height: 85%;
 }
 
 #metric-name {
@@ -64,7 +64,6 @@ body {
 div[id^='code-box'] {
   display: none;
 }
-
 
 div[id^='stat-box-header'] {
   background-color: #0d6efd;
@@ -76,6 +75,16 @@ div[id^='stat-box-header']:hover {
 }
 
 #statistics-charts {
-  display: none !important;
+  height: 95%;
+  width: 75%;
 }
 
+#chart-main {
+  display: none !important;
+  height: 90%;
+  width: 100%;
+}
+
+.chart-header {
+  background-color: rgb(23, 155, 144);
+}
