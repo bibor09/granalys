@@ -91,6 +91,7 @@ const getDatesAfter = (fromDateStr, dates) => {
       newDates.push(date);
     }
   });
+  newDates.sort();
 
   return newDates;
 };
@@ -117,6 +118,7 @@ const fillWithDates = (chart_data) => {
 
   // TODO: error handling in case of empty data
   const dates = getsetOfDates(chart_data);
+  dates.sort();
 
   dates.forEach((date) => {
     const dateOption = document.createElement("option");
@@ -124,8 +126,8 @@ const fillWithDates = (chart_data) => {
     dateOption.value = date;
     chooseDate.appendChild(dateOption);
   });
-}
 
+}
 
 const drawChart = (canvas, dates, chart_data, file) => {
   const chart = new Chart(canvas, {
