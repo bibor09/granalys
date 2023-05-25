@@ -32,13 +32,16 @@ const changeDisplay = function (event) {
   const selectedValue = selectDisplay.value;
 
   const stats = document.getElementById('statistics');
+  const statCheckboxes = document.getElementById('statistics-checkboxes');
   const charts = document.getElementById('chart-main');
 
   if (selectedValue === "files") {
     stats.style.cssText = 'display:flex !important';
+    statCheckboxes.style.cssText = 'display:flex !important';
     charts.style.cssText = 'display:none !important';
   } else if (selectedValue === "charts") {
     stats.style.cssText = 'display:none !important';
+    statCheckboxes.style.cssText = 'display:none !important';
     charts.style.cssText = 'display:flex !important';
   }
 };
@@ -220,11 +223,29 @@ const redrawCharts = (event, chart_data, charts) => {
 };
 
 // ------------- CHECKBOXES -----------
-const displayMetrics = (event) => {
-  const idk = document.getElementById('metric?comment');
-  const idk2 = document.getElementById('check?comment');
+const changeMetricsDisplay = (event) => {
+  const id = event.target.id;
+  const metric = id.split('?')[1]
 
+  const metricBoxes = document.querySelectorAll(`[id="metric?${metric}"]`);
+  if (event.target.checked) {
+    metricBoxes.forEach(mBox => {
+      mBox.style.display = "block";
+    });
+  } else {
+    metricBoxes.forEach(mBox => {
+      mBox.style.display = "none";
+    });
+  }
 };
+
+const addEventListenerToCheckboxes = () => {
+  const checkBoxes = document.querySelectorAll(`[id^="check?"]`);
+  checkBoxes.forEach(box => {
+    box.addEventListener('change', changeMetricsDisplay);
+  });
+};
+
 
 // ------------- ON LOAD --------------
 /** Add event listeners on load */
@@ -244,4 +265,5 @@ window.onload = () => {
   fillWithDates(chart_data);
   document.addEventListener('change', (event) => {redrawCharts(event, chart_data, charts)});
 
+  addEventListenerToCheckboxes();
 };

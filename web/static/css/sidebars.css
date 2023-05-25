@@ -55,7 +55,7 @@ body {
 }
 
 #statistics {
-  height: 85%;
+  height: 80%;
 }
 
 #metric-name {
@@ -63,7 +63,7 @@ body {
 }
 
 p[id^='metric?'] {
-  /* display: none; */
+  display: block;
 }
 
 div[id^='code-box'] {
@@ -92,4 +92,8 @@ div[id^='stat-box-header']:hover {
 
 .chart-header {
   background-color: rgb(23, 155, 144);
+}
+
+input[type='checkbox'] {
+  accent-color:  rgb(23, 155, 144);
 }
