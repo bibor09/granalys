@@ -119,7 +119,6 @@ const getsetOfDates = (chart_data) => {
 const fillWithDates = (chart_data) => {
   const chooseDate = document.getElementById("choose-date");
 
-  // TODO: error handling in case of empty data
   const dates = getsetOfDates(chart_data);
   dates.sort();
 
@@ -203,7 +202,6 @@ const initCharts = () => {
   return [chart_data, charts];
 };
 
-// TODO: error handling in case of empty data
 const redrawCharts = (event, chart_data, charts) => {
   if (event.target.id != "choose-date") {
     return;
