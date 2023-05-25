@@ -71,7 +71,7 @@ class Granalys:
                             "comment\t\t:Comment line ratio of file\n" +\
                             "loc\t\t:Lines of code\n" +\
                             "vars\t\t:Number of variables declared per methods\n" +\
-                            "complexity\t:Cyclomatic complexity of file\n" +\
+                            "complexity\t:Average cyclomatic complexity for methods in file\n" +\
                             "ec\t\t:Efferent coupling of classes\n" +\
                             "ac\t\t:Afferent coupling of classes\n" +\
                             "inst\t\t:Overall class instability\n" +\
@@ -130,8 +130,8 @@ class Granalys:
                         elif command == "complexity":
                             try:
                                 session.execute_read(_cyclomatic_complexity, self.verbose)
-                            except:
-                                logging.error("Failed to execute complexity measure")
+                            except Exception as e:
+                                logging.error("Failed to execute complexity measure",e )
                                 alive = False
 
                         elif command == "lcom4":

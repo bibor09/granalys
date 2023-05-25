@@ -142,17 +142,29 @@ decision_nodes = ["For", "AsyncFor", "While", "If", "And", "Or", "Try", "TryStar
 def _cyclomatic_complexity(tx, verbose = False):
     nodes = [{"name": name} for name in decision_nodes]
     result = tx.run("""
+        MATCH (func:Node {name:"FunctionDef"})
+        WITH collect(func.value) as functions
         UNWIND $nodes as node
-        MATCH (n:Node {name: node.name})
-        RETURN count(n) as cc
+        MATCH (f:Node {name:"FunctionDef"})-[:Child*1..]->(n:Node {name: node.name})
+        WITH functions, count(n) as cc
+        RETURN functions, cc
         """, nodes=nodes)
-    [r] = result.data()
-    cc = r["cc"] + 1
+    r = result.data()
     summary = result.consume()
 
+    avg_cc = 0
+    compl_gt_1 = 0
+    func_nr = 0
+    for row in r:
+        func_nr = len(row["functions"])
+        cc = int(row['cc']) + 1
+        avg_cc += cc
+        compl_gt_1 += 1
+
+    avg_cc = (avg_cc + func_nr - compl_gt_1) / func_nr
     if verbose:
-        print(f"Cyclomatic complexity: {cc}\t[{summary.result_available_after} ms]")
-    return cc
+        print(f"Cyclomatic complexity (avg): {avg_cc}\t[{summary.result_available_after} ms]")
+    return avg_cc
 
 
 '''
