@@ -1,6 +1,8 @@
+import os
 import sys
 import time
 import logging
+import re
 from neo4j import GraphDatabase, exceptions
 from ast_parser import get_ast
 from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, \
@@ -56,14 +58,39 @@ class Granalys:
             logging.error("Failed to delete.")
             sys.exit()
 
-    def start_cmd(self, filename):
+    def start_cmd(self):
+        print("************************************\n\n\tG R A N A L Y S\n\n************************************\n")
+        help = "help\t\t:Usage information\n" +\
+            "f [filename]\t:Parse file\n" +\
+            "exit\t\t:Exit Granalys\n"
+        print(help)
+
+        alive = True
+        while alive:
+            command = input(">> ")
+
+            if command == "help":
+                print(help)
+
+            elif re.match("^f .*\.py$", command):
+                filename = command.split(' ')[1]
+                if os.path.isfile(filename):
+                    self.console(filename)
+                else:
+                    logging.error(f"Invalid or non-existent file")
+
+            elif command == "exit":
+                alive = False
+                logging.info("Exiting...") 
+
+    def console(self, filename):
         self.get_file_ast(filename)
+        print(f"Analyzing: {filename}\n")
 
         try:
             with self.driver.session(database=self.db) as session:
                 try:
                     self.create_graph(session)
-                    print("************************************\n\n\tG R A N A L Y S\n\n************************************")
                     help = "help\t\t:Usage information\n" +\
                             "print\t\t:Print ast of file\n" +\
                             "exit\t\t:Exit tool\n" +\
@@ -82,6 +109,7 @@ class Granalys:
 
                     while alive:
                         command = input(">> ")
+
                         if command == "help":
                             print(help)
 

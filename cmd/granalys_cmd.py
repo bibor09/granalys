@@ -11,20 +11,13 @@ from analyzer import Granalys
 
 
 parser = argparse.ArgumentParser(description='Granalys')
-parser.add_argument('file', nargs=1, help='Filename')
 args = parser.parse_args()
 
 def main(args):
     logging.getLogger().setLevel(logging.INFO)
-
-    [file] = args.file
-    if not os.path.isfile(file):
-        logging.error(f"Invalid or non-existent file")
-        sys.exit()
-
     conf = Config("cmd", "granalys_cmd.yml")
     instance = Granalys(conf.neo4j_uri, conf.neo4j_auth, conf.neo4j_db, True)
-    instance.start_cmd(file)
+    instance.start_cmd()
     instance.close()
 
 if __name__ == "__main__":
