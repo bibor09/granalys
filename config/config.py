@@ -23,6 +23,7 @@ class Config:
                 self.github_auth_token = data['github.auth.token']
                 self.granalys_web_url = data['granalys.web.url']
                 self.mongo_db = data['mongodb.db']
+                self.mongo_collection = data['mongodb.collection']
                 self.mongo_url = data['mongodb.url']
                 self.mongo_port = data['mongodb.port']
                 self.mongo_user = data['mongodb.user']

@@ -9,13 +9,11 @@ import logging
 import re
 import hashlib
 import hmac
-import json
 from decouple import config
 from datetime import datetime
 from git import Repo
 from db.database import Database
 from db.models import Analysis
-from business import Business
 
 current = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.dirname(current)+"/config")
@@ -27,8 +25,8 @@ from analyzer import Granalys
 conf = Config("web", "granalys_web.yml")
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
-db = Database(conf.mongo_url, conf.mongo_port, name=conf.mongo_db, username=conf.mongo_user, password=conf.mongo_passwd)
-bs = Business(db)
+db = Database(conf.mongo_url, conf.mongo_port, name=conf.mongo_db, username=conf.mongo_user, password=conf.mongo_passwd, collection=conf.mongo_collection)
+# bs = Business(db)
 
 GITHUB_TOKEN = conf.github_auth_token
 URL = conf.granalys_web_url
@@ -39,11 +37,11 @@ URL = conf.granalys_web_url
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
     url_base = f"{user}/{repo}"
-    all_analyses = db.get_all('analysis', user, repo)   #every branch
-    curr_analysis = bs.get_one('analysis', {'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id}) #current branch, actual analysis
+    all_analyses = db.get_all_branches_with_latest_push(user, repo)   #every branch
+    curr_analysis = db.find_one({'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id}) #current branch, actual analysis
 
     curr_analysis_date = curr_analysis['created']
-    file_stats_chart = bs.get_file_statistics_from_date('analysis', curr_analysis_date, curr_analysis)
+    file_stats_chart = db.get_file_statistics_from_date(curr_analysis_date, curr_analysis)
 
     return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base, file_stats_chart=file_stats_chart)
 
@@ -136,7 +134,7 @@ def webhook():
             'statistics_all': stats_all}
     analysis = Analysis(**data)
     # TODO Error handling
-    bs.save(coll_name='analysis', entity=analysis)
+    db.save(entity=analysis)
 
     resp_data['state'] = 'success'
     resp_data['description'] = "Analysis completed."
