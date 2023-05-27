@@ -7,6 +7,10 @@ import stat
 import shutil
 import logging
 import re
+import hashlib
+import hmac
+import json
+from decouple import config
 from datetime import datetime
 from git import Repo
 from db.database import Database
@@ -60,6 +64,11 @@ def webhook():
     if 'ref' not in payload or 'repository' not in payload or 'full_name' not in payload['repository'] or 'clone_url' not in payload['repository'] or 'commits' not in payload:
         logging.error("Github push event has invalid payload format.")
         return Response("Error: Github push event has invalid payload format.", status = HTTPStatus.BAD_REQUEST)
+    
+    # Verify signature
+    ver_resp = verify_signature(request.data, config("SECRET_TOKEN"), request.headers.get("X-Hub-Signature-256"))
+    if ver_resp:
+        return ver_resp
     
     branch = payload['ref'].split('/')[-1]
     repo_name = payload['repository']['full_name']
@@ -138,6 +147,22 @@ def webhook():
     # Cleanup
     shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
     return response.json()
+
+
+def verify_signature(payload_body, secret_token, signature_header):
+    # Verify that the payload was sent from GitHub by validating SHA256.
+    if not signature_header:
+        logging.error("X-Hub-Signature-256 header is missing.")
+        return Response("Error: X-Hub-Signature-256 header is missing..", status = 403)  
+        
+    hash_object = hmac.new(secret_token.encode('utf-8'), msg=payload_body, digestmod=hashlib.sha256)
+    expected_signature = "sha256=" + hash_object.hexdigest()
+
+    if not hmac.compare_digest(expected_signature, signature_header):
+        logging.error("Request signatures didn't match!.")
+        return Response("Error: Request signatures didn't match!.", status = 403)  
+
+    return None
 
 def rm_dir_readonly(func, path, _):
     # Clear the readonly bit and reattempt the removal

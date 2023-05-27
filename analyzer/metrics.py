@@ -161,7 +161,11 @@ def _cyclomatic_complexity(tx, verbose = False):
         avg_cc += cc
         compl_gt_1 += 1
 
-    avg_cc = (avg_cc + func_nr - compl_gt_1) / func_nr
+    if func_nr != 0:
+        avg_cc = (avg_cc + func_nr - compl_gt_1) / func_nr
+    else:
+        avg_cc = 1
+
     if verbose:
         print(f"Cyclomatic complexity (avg): {avg_cc}\t[{summary.result_available_after} ms]")
     return avg_cc
