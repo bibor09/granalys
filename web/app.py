@@ -26,7 +26,6 @@ conf = Config("web", "granalys_web.yml")
 # Initialize
 app = Flask(__name__, static_url_path='', template_folder="templates", static_folder="static")
 db = Database(conf.mongo_url, conf.mongo_port, name=conf.mongo_db, username=conf.mongo_user, password=conf.mongo_passwd, collection=conf.mongo_collection)
-# bs = Business(db)
 
 GITHUB_TOKEN = conf.github_auth_token
 URL = conf.granalys_web_url
@@ -37,11 +36,11 @@ URL = conf.granalys_web_url
 @app.route('/<user>/<repo>/<branch>/<gd_id>', methods=['GET'])
 def event_by_id(user, repo, branch, gd_id):
     url_base = f"{user}/{repo}"
-    all_analyses = db.get_all_branches_with_latest_push(user, repo)   #every branch
-    curr_analysis = db.find_one({'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id}) #current branch, actual analysis
+    all_analyses = db.get_all_branches_with_latest_push(user, repo)
+    curr_analysis = db.find_one({'user':user, 'repo':repo, 'branch': branch, 'gd_id': gd_id})
 
     curr_analysis_date = curr_analysis['created']
-    file_stats_chart = db.get_file_statistics_from_date(curr_analysis_date, curr_analysis)
+    file_stats_chart = db.get_files_w_stats_from_date(curr_analysis_date, curr_analysis)
 
     return render_template("index.html", all_analyses=all_analyses, curr_analysis=curr_analysis, url_base=url_base, file_stats_chart=file_stats_chart)
 
@@ -71,6 +70,7 @@ def webhook():
     branch = payload['ref'].split('/')[-1]
     repo_name = payload['repository']['full_name']
     clone_url = payload['repository']['clone_url']
+    date = datetime.fromtimestamp(payload['repository']['pushed_at'])
     files = get_modified_py_files(payload['commits'])
         
 
@@ -125,12 +125,11 @@ def webhook():
         return requests.post(resp_url, headers=resp_headers, json=resp_data).json()
 
     # Build Github push event statistics data
-    now = datetime.now()
     data = {'user': repo_name.split('/')[0], \
             'repo': repo_name.split('/')[1], \
             'branch': branch, \
             'gd_id': gd_id, \
-            'created': now.strftime("%Y-%m-%d %H:%M:%S"), \
+            'created': date.strftime("%Y-%m-%d %H:%M:%S"), \
             'statistics_all': stats_all}
     analysis = Analysis(**data)
     # TODO Error handling
@@ -145,7 +144,6 @@ def webhook():
     # Cleanup
     shutil.rmtree(f'./tmp/{repo_name.split("/")[0]}', ignore_errors=False, onerror=rm_dir_readonly)
     return response.json()
-
 
 def verify_signature(payload_body, secret_token, signature_header):
     # Verify that the payload was sent from GitHub by validating SHA256.

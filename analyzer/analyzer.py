@@ -215,7 +215,7 @@ class Granalys:
                                         "loc": f"{int(loc)}",
                                         "ec": self.get_str_of(ec) if len(ec) > 0 else "No coupling",
                                         "ac": self.get_str_of(ac) if len(ac) > 0 else "No coupling",
-                                        "inst": "{:.2f}".format(inst) if type(inst) != str else inst,
+                                        "inst": inst if type(inst) == str else "{:.2f}".format(inst),
                                         "vars": self.get_str_of_vars(vars),
                                         "lcom4": self.get_str_of(lcom4) if len(lcom4) > 0 else "No classes",
                                         "content": file.read()}

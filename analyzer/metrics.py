@@ -21,7 +21,7 @@ def _comment_ratio(tx, verbose = False):
         if verbose:
             print(f"Comment ratio: {comment_nr}/{lines_nr} = {ratio}\t[{summary.result_available_after} ms]")
     else:
-        ratio = "empty file"
+        ratio = 0
         if verbose:
             print(f"Comment ratio: {ratio}\t[{summary.result_available_after} ms]")
     return ratio
