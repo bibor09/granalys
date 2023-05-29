@@ -18,9 +18,9 @@
   
 
   <!-- Custom -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebars.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/prism.css') }}"/>
-  <script src="{{ url_for('static', filename='js/sidebars.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
   <script src="{{ url_for('static', filename='js/prism.js') }}"></script>
 
   <style>
@@ -99,7 +99,7 @@
   </style>
 </head>
 
-<body>
+<body class="line-numbers">
   <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
     <symbol id="branch" viewBox="0 0 384 512">
       <path
@@ -247,7 +247,7 @@
         <div class="w-50">
           {% for stat_file in curr_analysis.statistics_all %}
           <div id="code-box?{{stat_file}}" class="h-100 w-100 px-2 mx-4">
-            <pre class="h-100"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
+            <pre id="code-pre?{{stat_file}}" class="h-100 linkable-line-numbers"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
           </div>
           {% endfor %}
         </div>
