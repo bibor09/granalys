@@ -273,149 +273,8 @@ def _lcom4(tx, all_class_methods, empty_class_methods, verbose = False):
    
     return lcom4
 
-'''
-Code duplication
-'''
-# Code duplication
-def path_union(path1, path2):
-    path1_nodeIds = set([n["nodeId"] for n in path1])
-    path2_nodeIds = set([n["nodeId"] for n in path2])
-    path1_nodeIds.union(path2_nodeIds)
 
-    path_union = []
-    for n in path1:
-        if n["nodeId"] in path1_nodeIds:
-            path_union.append(n)
-    for n in path2:
-        if n["nodeId"] in path2_nodeIds:
-            if n not in path_union:
-                path_union.append(n)
-
-    return path_union
-
-def concat_node_attributes(node):
-    str = node["name"]
-    if "value" in node.keys():
-        str += node["value"]
-    if "id" in node.keys():
-        str += node["id"]
-    return str
-
-def hash_subtree(subtree):
-    str = ''
-    for n in subtree:
-        str += concat_node_attributes(n)
-    return zlib.crc32(bytearray(str, 'utf-8'))
-
-def _duplicates(tx, verbose = False):
-    # 1 to not consider leaves
-    result = tx.run("""
-        MATCH path=(a:Node)-[r:Child*1..]->(b:Node)
-        WHERE not (b:Node)-[]->()
-        RETURN a, nodes(path) AS path
-        """)
-    r = result.data()
-
-    subtrees = dict()
-    # merge paths to get subtrees
-    for row in r:
-        a = row["a"]
-        id = a["nodeId"]
-        path = row["path"]
-        
-        if id not in subtrees.keys():
-            subtrees[id] = set()
-
-        subtrees[id] = path_union(subtrees[id], path)
-
-    # after subtrees are done
-    clones = dict()
-    for i in subtrees.values():
-        if len(i) >= 1:
-            hash = hash_subtree(i)
-        if hash not in clones.keys():
-            clones[hash] = []
-        clones[hash].append(i)
-
-    if verbose:
-        print("Duplicates:")
-    for trees in clones.values():
-        if len(trees) > 1:
-            lines = ''
-            for t in range(len(trees)):
-                lines += str(trees[t][0]["lineno"]) + " "
-            if verbose:
-                print(f"\tOn lines: {lines}")
-
-
-''' Clone detection '''
-def get_sublists(list, sublist, lines):
-    i = 0
-    occurrence_lines = []
-    while i < len(list) - len(sublist) + 1:
-        if list[i : i+len(sublist)] == sublist:
-            ls = set()
-            for j in range(i, i+len(sublist)):
-                ls.add(lines[j])
-            occurrence_lines.append(sorted(ls))
-            i += len(sublist)
-        i += 1
-    return occurrence_lines
-
-def _clone_detection(tx, verbose = False):
-    result = tx.run("""
-        MATCH (source:Node{name:'Module'})
-        CALL gds.dfs.stream('myGraph', {
-        sourceNode: source
-        })
-        YIELD path
-        WITH [n in nodes(path)] as nds
-        UNWIND nds as node
-        return node.name as name, node.lineno as line
-        """)
-    r = result.data()
-    summary = result.consume()
-
-    str = ''
-    lines = []
-    names = []
-    for row in r:
-        name = row['name']
-        line = row['line']
-        if line != 0:
-            str += f"{name},"
-            lines.append(line)
-            names.append(name)
-
-    names_str = ','.join([n for n in names])
-    tree = Tree({"1":names_str})
-
-    if verbose:
-        print(f"Clones on lines:")
-
-    clones = dict()
-    i = 1
-    # for _, path in sorted(tree.maximal_repeats()):
-    #     path_names = f"{path}"
-    #     path_names = path_names.split(',')
-    #     path_names = [s.replace(' ', '') for s in path_names]
-    #     path_names = [x_ for x_ in path_names if x_ != '']
-
-    #     if len(path_names) >= 3:
-    #         occ_lines = get_sublists(names, path_names, lines)
-    #         if len(occ_lines) > 1:
-    #             lines_str = ', '.join([f"{l[0]}-{l[-1]}" for l in occ_lines if len(l) >= 3])
-    #             if lines_str != "":
-    #                 clones[f"clone{i}"] = lines_str
-    #                 if verbose:
-    #                     print(f"\tclone{i}: ", clones[f"clone{i}"])
-                    # i += 1
-
-    if verbose:
-        print(f"\t[{summary.result_available_after} ms]")
-    return clones
-
-
+'''Depth in Inheritance Tree'''
 def find_depth(relations, child, depth):
     if child not in relations.keys():
         return depth
@@ -423,7 +282,7 @@ def find_depth(relations, child, depth):
         parent = relations[child]
         return find_depth(relations, parent, depth+1)
 
-'''Depth in Inheritance Tree'''
+
 def _dit(tx, verbose = False):
     result = tx.run('''
         MATCH (def:Node {name:"ClassDef"})-[:Child]->(ref:Node {name:"Name"})

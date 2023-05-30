@@ -5,9 +5,9 @@ import logging
 import re
 from neo4j import GraphDatabase, exceptions
 from ast_parser import get_ast
-from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, \
+from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _dit, \
 _get_all_class_methods, _get_empty_methods, _method_var_number, _loc, _efferent_coupling, \
-_afferent_coupling, _clone_detection, _dit
+_afferent_coupling
 
 class Granalys:
     def __init__(self, uri, auth, db, verbose = False):
