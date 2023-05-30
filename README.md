@@ -30,16 +30,16 @@ Granalys is a Windows-compatible static code analysis software for Python, that 
 
 In addition to the previous steps, for the web application you'll also need to:
 
- * #### Run MongoDB 6.0 docker container (for the web application)
+ * #### Run MongoDB 6.0 docker container
         docker run -p7687:7687 --name neo4j --env NEO4J_AUTH=neo4j/password  neo4j:5.7.0
 
-* ### Install [ngrok](https://ngrok.com/download) to provide configure a public IP
+* ### Install [ngrok](https://ngrok.com/download) to configure a public URL
     
     After installation execute the following command:
 
         ngrok http 5000
 
-    Copy the public URL from the `Forwarding` field and [configure it as a webhook](#web-application) URL in your GitHub repository.
+    Copy the public URL from the `Forwarding` field and [configure it as a webhook](#github-integration-with-the-web-application) URL in your GitHub repository.
 
         Forwarding                    <example_public_url> -> http://localhost:5000       
 
