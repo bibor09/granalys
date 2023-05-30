@@ -186,6 +186,10 @@
           <input type="checkbox" id="check?inst" class="" checked>
           <label>Instability</label>
         </div>
+        <div class="px-3"> 
+          <input type="checkbox" id="check?dit" class="" checked>
+          <label>DIT</label>
+        </div>
       </div>
 
       <!-- STATISTICS -->
@@ -235,7 +239,9 @@
                   <p id="metric?inst" class="col"><b id="metric-name" class="fs-6">Instability: </b>
                     <span>{{ curr_analysis.statistics_all[stat_file]["inst"] }}</span>
                   </p>
-                  <p id="metric?" class="col"><b id="metric-name" class="fs-6"></b></p>
+                  <p id="metric?dit" class="col"><b id="metric-name" class="fs-6">Depth in Inheritance Tree: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["dit"] }}</span>
+                  </p>
                   {% endautoescape %}
                 </div>
               </div>

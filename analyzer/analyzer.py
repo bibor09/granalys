@@ -7,7 +7,7 @@ from neo4j import GraphDatabase, exceptions
 from ast_parser import get_ast
 from metrics import _comment_ratio, _cyclomatic_complexity, _lcom4, _duplicates, \
 _get_all_class_methods, _get_empty_methods, _method_var_number, _loc, _efferent_coupling, \
-_afferent_coupling
+_afferent_coupling, _clone_detection, _dit
 
 class Granalys:
     def __init__(self, uri, auth, db, verbose = False):
@@ -67,21 +67,25 @@ class Granalys:
 
         alive = True
         while alive:
-            command = input(">> ")
+            try:
+                command = input(">> ")
 
-            if command == "help":
-                print(help)
+                if command == "help":
+                    print(help)
 
-            elif re.match("^f .*\.py$", command):
-                filename = command.split(' ')[1]
-                if os.path.isfile(filename):
-                    self.console(filename)
-                else:
-                    logging.error(f"Invalid or non-existent file")
+                elif re.match("^f .*\.py$", command):
+                    filename = command.split(' ')[1]
+                    if os.path.isfile(filename):
+                        self.console(filename)
+                    else:
+                        logging.error(f"Invalid or non-existent file")
 
-            elif command == "exit":
+                elif command == "exit":
+                    alive = False
+                    logging.info("Exiting...") 
+
+            except KeyboardInterrupt:
                 alive = False
-                logging.info("Exiting...") 
 
     def console(self, filename):
         self.get_file_ast(filename)
@@ -91,6 +95,7 @@ class Granalys:
             with self.driver.session(database=self.db) as session:
                 try:
                     self.create_graph(session)
+                    
                     help = "help\t\t:Usage information\n" +\
                             "print\t\t:Print ast of file\n" +\
                             "exit\t\t:Exit tool\n" +\
@@ -103,7 +108,7 @@ class Granalys:
                             "ac\t\t:Afferent coupling of classes\n" +\
                             "inst\t\t:Overall class instability\n" +\
                             "lcom4\t\t:Lack of Cohesion in Method measure per classes in file\n" +\
-                            "duplicates\t:Duplicates in file\n" 
+                            "dit\t\t:Depth of Inheritance Tree (in file)\n"
                     print(help)
                     alive = True
 
@@ -158,8 +163,8 @@ class Granalys:
                         elif command == "complexity":
                             try:
                                 session.execute_read(_cyclomatic_complexity, self.verbose)
-                            except Exception as e:
-                                logging.error("Failed to execute complexity measure",e )
+                            except:
+                                logging.error("Failed to execute complexity measure")
                                 alive = False
 
                         elif command == "lcom4":
@@ -168,12 +173,12 @@ class Granalys:
                             except:
                                 logging.error("Failed to execute lcom4 measure")
                                 alive = False
-
-                        elif command == "duplicates":
+                        
+                        elif command == "dit":
                             try:
-                                session.execute_read(_duplicates, self.verbose)
-                            except:
-                                logging.error("Failed to execute duplicate measure")
+                                session.execute_read(_dit, self.verbose)
+                            except Exception as e:
+                                logging.error("Failed to execute DIT measure",e)
                                 alive = False
 
                         elif command == "print":
@@ -191,7 +196,6 @@ class Granalys:
             sys.exit()
 
     def analyze_files(self, base, files):
-        # dict: {filename: dict(stats)}
         stats = dict()
         try:
             with self.driver.session(database=self.db) as session:
@@ -208,6 +212,7 @@ class Granalys:
                         loc = session.execute_read(_loc)
                         vars = session.execute_read(_method_var_number)
                         lcom4 = self.lcom4(session, self.verbose)
+                        dit = session.execute_read(_dit)
 
                         with open(f"{base}/{f}", "r") as file:
                             stats[f] = {"comment": "{:.2f}".format(comment_rat), 
@@ -218,12 +223,14 @@ class Granalys:
                                         "inst": inst if type(inst) == str else "{:.2f}".format(inst),
                                         "vars": self.get_str_of_vars(vars),
                                         "lcom4": self.get_str_of(lcom4) if len(lcom4) > 0 else "No classes",
+                                        "dit": self.get_str_of(dit) if len(dit) > 0 else "No inheritance",
                                         "content": file.read()}
                         
                         self.delete_graph(session)
                         self.close()
                 except Exception as e:
                     print(e)
+                    self.delete_graph(session)
                     return None
         except:
             return None
