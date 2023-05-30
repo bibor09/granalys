@@ -2,15 +2,18 @@
 
 Granalys is a Windows-compatible static code analysis software for Python, that executes software metrics on AST with the help of [Neo4j](https://neo4j.com/) graph database.
 
-## Install
-### Prerequisites
+## Prerequisites
 * Python 3.9.x
 * Docker
 
-    #### Run Neo4j 5.7.0 docker container
+## Installation
+
+### For both the command-line tool and web application
+    
+* #### Run Neo4j 5.7.0 docker container
     `docker run -p7687:7687 --name neo4j --env NEO4J_AUTH=neo4j/password  neo4j:5.7.0`
 
-    #### Setup Python virtual environment
+* #### Setup Python virtual environment
     In the `granalys` root folder create a Python virtual environment and activate it:
 
     `python -m venv ".venv"`
@@ -27,12 +30,12 @@ Granalys is a Windows-compatible static code analysis software for Python, that 
 
 ### For the web application
 
-* In addition to the previous steps, for the web application you'll also need to:
+In addition to the previous steps, for the web application you'll also need to:
 
-    #### Run MongoDB 6.0 docker container (for the web application)
+ * #### Run MongoDB 6.0 docker container (for the web application)
     `docker run -p7687:7687 --name neo4j --env NEO4J_AUTH=neo4j/password  neo4j:5.7.0`
 
-    ### Install [ngrok](https://ngrok.com/download) to provide configure a public IP
+* ### Install [ngrok](https://ngrok.com/download) to provide configure a public IP
     
     After installation execute the following:
 
@@ -50,18 +53,18 @@ Granalys is a Windows-compatible static code analysis software for Python, that 
 
 * ### GitHub integration with the Web Application
 
-    For automatic static analysis execution on a GitHub repository, create a webhook following the guide: https://docs.github.com/en/webhooks-and-events/webhooks/creating-webhooks
+    * For automatic static analysis execution on a GitHub repository, create a webhook following the guide: https://docs.github.com/en/webhooks-and-events/webhooks/creating-webhooks
 
-    * Set the `Payload URL` to the URL created in the [web installation steps](#for-the-web-application).
+        * Set the `Payload URL` to the URL created in the [web installation steps](#for-the-web-application).
 
-    * Set the `Content type` to  `application/json`.
+        * Set the `Content type` to  `application/json`.
 
-    * Set a `Secret` ([guide](https://docs.github.com/en/webhooks-and-events/webhooks/securing-your-webhooks)) and append it to the `granalys/.env` file:
+        * Set a `Secret` ([guide](https://docs.github.com/en/webhooks-and-events/webhooks/securing-your-webhooks)) and append it to the `granalys/.env` file:
 
-            SECRET_TOKEN = '<example_secret_token>'
+                SECRET_TOKEN = '<example_secret_token>'
 
-    In the `granalys/web/granalys_web.yml` configuration file set the `granalys.web.url` attribute to the URL created in the [web installation steps](#for-the-web-application), and set the `github.auth.token` attribute to your [Github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+    * In the `granalys/web/granalys_web.yml` configuration file set the `granalys.web.url` attribute to the URL created in the [web installation steps](#for-the-web-application), and set the `github.auth.token` attribute to your [Github personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
-    To start the web application activate the previously created virtual environment and from the `granalys` directory run:
+    * To start the web application activate the previously created virtual environment and from the `granalys` directory run:
 
-    `python web/app.py`
+        `python web/app.py`
