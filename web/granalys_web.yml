@@ -1,0 +1,15 @@
+neo4j.db: neo4j
+neo4j.uri: bolt://localhost:7687
+neo4j.user: neo4j
+neo4j.passwd: password
+
+mongodb.url: localhost
+mongodb.port: 27017
+mongodb.db: analyses
+mongodb.collection: analysis
+mongodb.passwd: password
+mongodb.user: admin
+
+# Must be set before usage
+# granalys.web.url:
+# github.auth.token: 

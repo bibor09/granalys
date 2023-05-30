@@ -40,6 +40,5 @@ coverage.xml
 # ignore
 /data
 /tmp
-/web/granalys_web.yml
-/cmd/granalys_cmd.yml
+/.venv
 .env
