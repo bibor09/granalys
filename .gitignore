@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# xmls
+*.xml
+
+# ignore
+/data
+/tmp
+/.venv
+.env
+./vscode

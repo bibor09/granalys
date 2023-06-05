@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Granalys</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+    crossorigin="anonymous"></script>
+
+  <!-- Chart -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.js"></script>
+  
+
+  <!-- Custom -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/prism.css') }}"/>
+  <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/prism.js') }}"></script>
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+
+    .b-example-divider {
+      width: 100%;
+      height: 3rem;
+      background-color: rgba(0, 0, 0, .1);
+      border: solid rgba(0, 0, 0, .15);
+      border-width: 1px 0;
+      box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+    }
+
+    .b-example-vr {
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 100vh;
+    }
+
+    .bi {
+      vertical-align: -.125em;
+      fill: currentColor;
+    }
+
+    .nav-scroller {
+      position: relative;
+      z-index: 2;
+      height: 2.75rem;
+      overflow-y: hidden;
+    }
+
+    .nav-scroller .nav {
+      display: flex;
+      flex-wrap: nowrap;
+      padding-bottom: 1rem;
+      margin-top: -1px;
+      overflow-x: auto;
+      text-align: center;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .btn-bd-primary {
+      --bd-violet-bg: #712cf9;
+      --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+      --bs-btn-font-weight: 600;
+      --bs-btn-color: var(--bs-white);
+      --bs-btn-bg: var(--bd-violet-bg);
+      --bs-btn-border-color: var(--bd-violet-bg);
+      --bs-btn-hover-color: var(--bs-white);
+      --bs-btn-hover-bg: #6528e0;
+      --bs-btn-hover-border-color: #6528e0;
+      --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+      --bs-btn-active-color: var(--bs-btn-hover-color);
+      --bs-btn-active-bg: #5a23c8;
+      --bs-btn-active-border-color: #5a23c8;
+    }
+
+    .bd-mode-toggle {
+      z-index: 1500;
+    }
+  </style>
+</head>
+
+<body class="line-numbers">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="branch" viewBox="0 0 384 512">
+      <path
+        d="M384 144c0-44.2-35.8-80-80-80s-80 35.8-80 80c0 36.4 24.3 67.1 57.5 76.8-.6 16.1-4.2 28.5-11 36.9-15.4 19.2-49.3 22.4-85.2 25.7-28.2 2.6-57.4 5.4-81.3 16.9v-144c32.5-10.2 56-40.5 56-76.3 0-44.2-35.8-80-80-80S0 35.8 0 80c0 35.8 23.5 66.1 56 76.3v199.3C23.5 365.9 0 396.2 0 432c0 44.2 35.8 80 80 80s80-35.8 80-80c0-34-21.2-63.1-51.2-74.6 3.1-5.2 7.8-9.8 14.9-13.4 16.2-8.2 40.4-10.4 66.1-12.8 42.2-3.9 90-8.4 118.2-43.4 14-17.4 21.1-39.8 21.6-67.9 31.6-10.8 54.4-40.7 54.4-75.9zM80 64c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16zm0 384c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16zm224-320c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16z" />
+    </symbol>
+    <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark" viewBox="0 0 16 16"> -->
+    <symbol id="file" viewBox="0 0 16 16">
+      <path
+        d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z" />
+    </symbol>
+    <!-- </svg> -->
+  </svg>
+
+  <div id="main" class="d-flex vh-100 flex-nowrap">
+    <!-- BRANCHES -->
+    <div id="sidebar" class="d-flex flex-column flex-shrink-1 p-3 h-100 text-bg-dark" style="width: 280px;">
+      <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <span class="fs-4">Branches</span>
+      </a>
+      <hr>
+      <ul id="sidebar" class="nav nav-pills flex-column mb-auto">
+        {% for analysis in all_analyses %}
+        <li id="branch-{{ branch_name }}" class="nav-item">
+          {% if curr_analysis.branch == analysis.branch %}
+          <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white active">
+            {% else %}
+            <a href="/{{ url_base }}/{{ analysis.branch }}/{{ analysis.gd_id }}" class="nav-link text-white">
+              {% endif %}
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <use xlink:href="#branch" />
+              </svg>
+              {{ analysis.branch }}
+            </a>
+        </li>
+        {% endfor %}
+      </ul>
+      <hr>
+    </div>
+
+    <!-- MEASURES -->
+    <div id="measure" class="container px-4 py-4 h-100">
+      <!-- HEADER -->
+      <div id="measure-header" class="d-flex flex-row">
+        <h2 class="pb-2 px-2 flex-grow-1 border-bottom">Metrics</h2>
+        <div class="p-2">
+          <select id="choose-display" class="form-select text-white bg-secondary" aria-label="method">
+            <option value="files" selected>Files</option>
+            <option value="charts">Charts</option>
+          </select>
+        </div>
+      </div>
+      <p class="px-2"><b>Date: </b>{{ curr_analysis.created }} </p>
+      <!-- Checkboxes -->
+      <div id="statistics-checkboxes" class="d-flex flex-wrap">
+        <div class="px-3">
+          <input type="checkbox" id="check?comment" class="" checked>
+          <label>Comment-line ratio</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?complexity" class="" checked>
+          <label>Cyclomatic Complexity</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?loc" class="" checked>
+          <label>Lines of Code</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?vars" class="" checked>
+          <label>Method variable number</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?ec" class="" checked>
+          <label>Efferent Coupling</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?ac" class="" checked>
+          <label>Afferent Coupling</label>
+        </div>
+        <div class="px-3">
+          <input type="checkbox" id="check?lcom4" class="" checked>
+          <label>LCOM4</label>
+        </div>
+        <div class="px-3"> 
+          <input type="checkbox" id="check?inst" class="" checked>
+          <label>Instability</label>
+        </div>
+        <div class="px-3"> 
+          <input type="checkbox" id="check?dit" class="" checked>
+          <label>DIT</label>
+        </div>
+      </div>
+
+      <!-- STATISTICS -->
+      <div id="statistics" class="d-flex flex-row p-1">
+        <!-- TEXT-->
+        <div class="d-flex flex-column overflow-auto h-100 w-100 px-2">
+          {% for stat_file in curr_analysis.statistics_all %}
+            <div id="stat-box" class="d-flex flex-column px-1 py-1 mb-1">
+              <div id="stat-box-header?{{stat_file}}"
+                class="bg-gradient p-1 mb-1 rounded-1 shadow-sm text-wrap text-break text-white fs-6">
+                <svg class="bi pe-none me-2" width="20" height="20">
+                  <use xlink:href="#file" />
+                </svg>
+                {{ stat_file }}
+              </div>
+              <!-- stats -->
+              <div id="stat-box-body" class="align-items-center p-1 mb-1 shadow bg-light" style="font-size: 0.8rem">
+                <div class="row px-2">
+                  <p id="metric?comment" class="col"><b id="metric-name" class="fs-6">Comment-line ratio: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["comment"] }}</span>
+                  </p>
+                  <p id="metric?complexity" class="col"><b id="metric-name" class="fs-6">Cyclomatic Compexity (avg): </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["complexity"] }}</span>
+                  </p>
+                  <p id="metric?loc" class="col"><b id="metric-name" class="fs-6">Lines of Code: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["loc"] }}</span>
+                  </p>
+                </div>
+                <div class="row px-2">
+                  {% autoescape false %}
+                  <p id="metric?vars" class="col"><b id="metric-name" class="fs-6">Method variable number: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["vars"] }}</span>
+                  </p>
+                  <p id="metric?ec" class="col"><b id="metric-name" class="fs-6">Efferent Coupling: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["ec"] }}</span>
+                  </p>
+                  <p id="metric?ac" class="col"><b id="metric-name" class="fs-6">Afferent Coupling: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["ac"] }}</span>
+                  </p>
+                  {% endautoescape %}
+                </div>
+                <div class="row px-2">
+                  {% autoescape false %}
+                  <p id="metric?lcom4" class="col"><b id="metric-name" class="fs-6">LCOM4: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["lcom4"] }}</span>
+                  </p>
+                  <p id="metric?inst" class="col"><b id="metric-name" class="fs-6">Instability: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["inst"] }}</span>
+                  </p>
+                  <p id="metric?dit" class="col"><b id="metric-name" class="fs-6">Depth in Inheritance Tree: </b>
+                    <span>{{ curr_analysis.statistics_all[stat_file]["dit"] }}</span>
+                  </p>
+                  {% endautoescape %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- CODE -->
+        <div class="w-50">
+          {% for stat_file in curr_analysis.statistics_all %}
+          <div id="code-box?{{stat_file}}" class="h-100 w-100 px-2 mx-4">
+            <pre id="code-pre?{{stat_file}}" class="h-100 linkable-line-numbers"><code class="h-100 language-python">{{ curr_analysis.statistics_all[stat_file]["content"] }}</code></pre>
+          </div>
+          {% endfor %}
+        </div>
+      </div> 
+
+      <!-- CHARTS -->
+      <div id="chart-main" class="d-flex flex-row p-1">
+        <!-- charts -->
+        <div id="statistics-charts" class="d-flex flex-column overflow-auto px-2" data-chart="{{ file_stats_chart }}"></div>
+        <!-- select date -->
+        <div class="m-3">
+          <select id="choose-date" class="form-select" aria-label="method">
+            <option selected>Show from Date</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+    
+  </div>
+</body>
+
+</html>
