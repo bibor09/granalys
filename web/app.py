@@ -181,5 +181,5 @@ def get_modified_py_files(commits):
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
-    app.run(debug=True)
+    app.run(debug=False)
     db.close()
